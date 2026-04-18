@@ -1,0 +1,61 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Masuk / Daftar | LPIA">
+    <section class="min-h-[80vh] flex items-center justify-center px-6 py-24">
+        <div class="bg-white border-4 border-gray-800 p-8 rounded-3xl shadow-[12px_12px_0_#1f2937] max-w-md w-full auth-form">
+            <div class="text-center mb-8">
+                <h1 id="auth-title" class="text-3xl font-black text-gray-800 italic">Masuk ke LPIA</h1>
+                <p class="text-gray-500 font-bold">Ayo lanjut belajar skill barumu!</p>
+            </div>
+
+            <form id="auth-form" class="space-y-5">
+                <div id="name-field" class="hidden">
+                    <label class="block mb-2 font-black text-gray-700">Nama Lengkap</label>
+                    <input type="text" name="full_name" class="input-field" placeholder="Masukkan nama lengkap">
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-black text-gray-700">Email</label>
+                    <input type="email" name="email" required class="input-field" placeholder="contoh@mail.com">
+                </div>
+
+                <div>
+                    <label class="block mb-2 font-black text-gray-700">Password</label>
+                    <input type="password" name="password" required class="input-field" placeholder="••••••••">
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full btn-school py-4 text-lg">
+                    Masuk
+                </button>
+            </form>
+
+            <div class="mt-8 text-center border-t-2 border-dashed border-gray-200 pt-6">
+                <p class="font-bold text-gray-600">
+                    Belum punya akun? 
+                    <a href="#" class="toggle-auth text-primary hover:underline">Daftar Sekarang</a>
+                </p>
+            </div>
+        </div>
+    </section>
+</Layout>
+
+<style>
+    /* Pastikan path ini benar sesuai struktur folder kamu */
+    @reference "../styles/global.css";
+
+    .input-field {
+        @apply w-full border-[3px] border-gray-300 rounded-xl px-4 py-3 text-gray-900 font-medium transition-all;
+        @apply focus:border-primary focus:bg-blue-50/30 outline-none placeholder-gray-400;
+    }
+
+    .auth-form {
+        animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+</style>

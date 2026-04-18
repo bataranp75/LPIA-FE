@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3b82f6;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-light: #93c5fd;
+}
+
+/* Base Style */
+:root {
+  --font-sandman: 'montserrat', cursive;
+}
+
+body {
+  font-family: var(--font-sandman), 'Comic Sans MS', sans-serif;
+}
+
+/* Background Texture ala Back to School */
+.bg-dots {
+  background-color: #ffffff;
+  background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+  background-size: 25px 25px;
+}
+
+.bg-lines {
+  background-color: #ffffff;
+  background-image: repeating-linear-gradient(transparent, transparent 28px, #e2e8f0 28px, #e2e8f0 30px);
+}
+
+/* Efek tombol playful */
+.btn-school {
+  @apply bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-xl 
+         shadow-[0_4px_0_#1d4ed8] active:shadow-none active:translate-y-1 
+         transition-all font-bold;
+}

@@ -1,0 +1,137 @@
+---
+const { items = [] } = Astro.props;
+
+const placeholderItems = [
+    {
+        image: "https://placehold.co/900x460/3b82f6/white?text=Kursus+Bahasa+Inggris",
+        title: "Kuasai Bahasa Inggris",
+        subtitle: "Dari basic hingga advanced — belajar bareng instruktur berpengalaman.",
+        badge: "Terlaris 🔥"
+    },
+    {
+        image: "https://placehold.co/900x460/6366f1/white?text=Kursus+Mandarin",
+        title: "Belajar Mandarin Yuk!",
+        subtitle: "Buka peluang karier lebih luas dengan kemampuan bahasa Mandarin.",
+        badge: "Baru ✨"
+    },
+    {
+        image: "https://placehold.co/900x460/0ea5e9/white?text=Persiapan+TOEFL",
+        title: "Persiapan TOEFL & IELTS",
+        subtitle: "Target skor tinggi dengan metode belajar yang sudah teruji.",
+        badge: "Populer 🎯"
+    }
+];
+
+const slides = items.length > 0 ? items : placeholderItems;
+---
+
+<div class="carousel-wrapper relative w-full overflow-hidden rounded-3xl border-3 border-gray-500 bg-white">
+
+    <!-- Slides Track -->
+    <div class="carousel-track flex transition-transform duration-500 ease-in-out" id="carousel-track">
+        {slides.map((item, index) => (
+            <div class="carousel-slide min-w-full relative">
+                <div class="relative w-full h-[380px] md:h-[440px] overflow-hidden">
+                    <img
+                        src={item.image}
+                        alt={item.title || "Promo LPIA"}
+                        class="w-full h-full object-cover"
+                        loading={index === 0 ? 'eager' : 'lazy'}
+                    />
+                    <!-- Gradient overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/20 to-transparent"></div>
+
+                    <!-- Content -->
+                    <div class="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                        {item.badge && (
+                            <span class="inline-block bg-yellow-400 text-gray-900 text-xs font-black px-3 py-1 rounded-full border-2 border-gray-900 mb-3">
+                                {item.badge}
+                            </span>
+                        )}
+                        <h3 class="text-2xl md:text-3xl font-black text-white leading-tight mb-1">
+                            {item.title}
+                        </h3>
+                        <p class="text-white/75 text-sm md:text-base font-medium max-w-lg">
+                            {item.subtitle}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        ))}
+    </div>
+
+    <!-- Prev Button -->
+    <button
+        id="carousel-prev"
+        class="absolute left-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border-[3px] border-gray-900 rounded-full flex items-center justify-center font-black text-gray-900 shadow-[0_3px_0_0_#1f2937] active:shadow-none active:translate-y-[calc(-50%+3px)] transition-all"
+        aria-label="Sebelumnya"
+    >
+        <i class="fas fa-chevron-left text-sm"></i>
+    </button>
+
+    <!-- Next Button -->
+    <button
+        id="carousel-next"
+        class="absolute right-3 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white border-[3px] border-gray-900 rounded-full flex items-center justify-center font-black text-gray-900 shadow-[0_3px_0_0_#1f2937] active:shadow-none active:translate-y-[calc(-50%+3px)] transition-all"
+        aria-label="Berikutnya"
+    >
+        <i class="fas fa-chevron-right text-sm"></i>
+    </button>
+
+    <!-- Dots -->
+    <div class="absolute bottom-4 right-6 flex gap-2 z-10" id="carousel-dots">
+        {slides.map((_, index) => (
+            <button
+                class={`carousel-dot h-2.5 rounded-full border-2 border-white/80 transition-all duration-300 ${index === 0 ? 'bg-yellow-400 w-6 border-gray-900' : 'bg-white/50 w-2.5'}`}
+                data-index={index}
+                aria-label={`Slide ${index + 1}`}
+            ></button>
+        ))}
+    </div>
+</div>
+
+<script>
+    const track    = document.getElementById('carousel-track') as HTMLElement;
+    const dotsEl   = document.querySelectorAll<HTMLElement>('.carousel-dot');
+    const prevBtn  = document.getElementById('carousel-prev');
+    const nextBtn  = document.getElementById('carousel-next');
+
+    if (!track) throw new Error('carousel-track not found');
+
+    const total = track.children.length;
+    let current = 0;
+    let timer: ReturnType<typeof setInterval>;
+
+    function goTo(n: number) {
+        current = ((n % total) + total) % total;
+        track.style.transform = `translateX(-${current * 100}%)`;
+        dotsEl.forEach((dot, i) => {
+            const active = i === current;
+            dot.classList.toggle('bg-yellow-400', active);
+            dot.classList.toggle('w-6', active);
+            dot.classList.toggle('border-gray-900', active);
+            dot.classList.toggle('bg-white/50', !active);
+            dot.classList.toggle('w-2.5', !active);
+            dot.classList.toggle('border-white/80', !active);
+        });
+    }
+
+    function resetTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => goTo(current + 1), 4500);
+    }
+
+    prevBtn?.addEventListener('click', () => { goTo(current - 1); resetTimer(); });
+    nextBtn?.addEventListener('click', () => { goTo(current + 1); resetTimer(); });
+    dotsEl.forEach((dot, i) => dot.addEventListener('click', () => { goTo(i); resetTimer(); }));
+
+    // Swipe support
+    let startX = 0;
+    track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener('touchend', e => {
+        const diff = startX - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) { goTo(current + (diff > 0 ? 1 : -1)); resetTimer(); }
+    });
+
+    resetTimer();
+</script>
