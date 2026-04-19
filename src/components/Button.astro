@@ -1,23 +1,4 @@
 ---
-/**
- * Button Component - LPIA Design System
- * 
- * Props:
- * - variant: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost'  (default: 'primary')
- * - size: 'sm' | 'md' | 'lg'  (default: 'md')
- * - disabled: boolean (default: false)
- * - href: string — jika diisi, render sebagai <a>
- * - type: 'button' | 'submit' | 'reset'  (default: 'button')
- * - id: string
- * - class: string — tambahan class kustom
- * 
- * Usage:
- * <Button variant="primary">Daftar Sekarang</Button>
- * <Button variant="secondary" size="sm">Lihat Detail</Button>
- * <Button variant="danger" disabled>Hapus</Button>
- * <Button variant="outline" href="/login">Masuk</Button>
- */
-
 interface Props {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
@@ -38,69 +19,34 @@ const {
   class: extraClass = '',
 } = Astro.props;
 
-// ── Size classes ──────────────────────────────────────────────────
 const sizeMap = {
   sm:  'px-4 py-2 text-sm',
   md:  'px-6 py-2.5 text-base',
-  lg:  'px-9 py-3.5 text-lg',
+  lg:  'px-8 py-3 text-lg',
 };
 
-// ── Variant classes ───────────────────────────────────────────────
-// Setiap varian punya:
-//   - bg / border / text color
-//   - shadow neobrutalist (bukan drop-shadow)
-//   - active: translate + shadow-none (efek "ditekan")
+// Menggunakan shadow tipis searah warna background
 const variantMap = {
   primary:
-    'bg-primary border-gray-900 text-white ' +
-    'shadow-[0_4px_0_0_#1e3a5f] ' +
-    'hover:brightness-105 ' +
-    'active:shadow-none active:translate-y-[4px]',
-
+    'bg-blue-600 text-white shadow-[0_3px_0_0_#1e40af] hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-[3px] active:shadow-none border border-blue-700',
   secondary:
-    'bg-gray-900 border-gray-900 text-white ' +
-    'shadow-[0_4px_0_0_#6b7280] ' +
-    'hover:bg-gray-800 ' +
-    'active:shadow-none active:translate-y-[4px]',
-
+    'bg-slate-800 text-white shadow-[0_3px_0_0_#0f172a] hover:bg-slate-900 hover:-translate-y-0.5 active:translate-y-[3px] active:shadow-none border border-slate-900',
   outline:
-    'bg-white border-gray-900 text-gray-900 ' +
-    'shadow-[0_4px_0_0_#1f2937] ' +
-    'hover:bg-gray-50 ' +
-    'active:shadow-none active:translate-y-[4px]',
-
+    'bg-white border-2 border-gray-200 text-gray-700 shadow-[0_3px_0_0_#e5e7eb] hover:border-blue-600 hover:text-blue-600 hover:-translate-y-0.5 active:translate-y-[3px] active:shadow-none',
   danger:
-    'bg-red-500 border-red-900 text-white ' +
-    'shadow-[0_4px_0_0_#7f1d1d] ' +
-    'hover:bg-red-600 ' +
-    'active:shadow-none active:translate-y-[4px]',
-
+    'bg-red-600 text-white shadow-[0_3px_0_0_#991b1b] hover:bg-red-700 hover:-translate-y-0.5 active:translate-y-[3px] active:shadow-none border border-red-700',
   ghost:
-    'bg-transparent border-transparent text-primary ' +
-    'shadow-none ' +
-    'hover:bg-blue-50 ' +
-    'active:bg-blue-100',
+    'bg-transparent text-blue-600 shadow-none hover:bg-blue-50 active:bg-blue-100',
 };
 
-// ── Disabled override ─────────────────────────────────────────────
 const disabledClasses = disabled
-  ? 'opacity-40 cursor-not-allowed pointer-events-none shadow-none'
+  ? 'opacity-50 cursor-not-allowed pointer-events-none shadow-none translate-y-0'
   : 'cursor-pointer';
 
-// ── Compose ───────────────────────────────────────────────────────
 const base =
-  'inline-flex items-center justify-center gap-2 ' +
-  'font-black tracking-tight rounded-xl border-[3px] ' +
-  'transition-all duration-100 select-none ' +
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
+  'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2';
 
-const classes = [
-  base,
-  sizeMap[size],
-  variantMap[variant],
-  disabledClasses,
-  extraClass,
-].join(' ');
+const classes = [base, sizeMap[size], variantMap[variant], disabledClasses, extraClass].join(' ');
 ---
 
 {href ? (

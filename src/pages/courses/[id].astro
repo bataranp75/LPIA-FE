@@ -1,0 +1,104 @@
+---
+// src/pages/courses/[id].astro
+export const prerender = false;
+import Layout from '../../layouts/Layout.astro';
+
+---
+
+<Layout title="Detail Kursus | LPIA">
+    <script is:inline type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-XXXXX"></script>
+
+    <div id="course-detail-page" class="min-h-screen bg-slate-50 pb-24">
+        
+        <div class="bg-slate-900 pt-32 pb-20 relative overflow-hidden">
+            <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+            <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+                <nav class="flex text-sm text-slate-400 mb-6 font-medium">
+                    <a href="/" class="hover:text-white transition-colors">Home</a>
+                    <span class="mx-2">/</span>
+                    <a href="/courses" class="hover:text-white transition-colors">Kursus</a>
+                    <span class="mx-2">/</span>
+                    <span id="bc-course-title" class="text-slate-200">Memuat...</span>
+                </nav>
+
+                <div class="max-w-3xl">
+                    <span id="hero-category" class="inline-block bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full mb-4 uppercase tracking-wider shadow-sm">
+                        Kategori
+                    </span>
+                    <h1 id="hero-title" class="text-3xl md:text-5xl font-black text-white leading-tight mb-6 tracking-tight">
+                        <i class="fas fa-spinner fa-spin text-blue-500"></i> Memuat Detail Kursus...
+                    </h1>
+                    <p id="hero-desc" class="text-lg text-slate-300 mb-8 leading-relaxed line-clamp-3">
+                        Mohon tunggu sebentar, kami sedang mengambil data kursus terbaik untuk Anda.
+                    </p>
+                    
+                    <div class="flex items-center gap-6 text-sm font-semibold text-slate-300">
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-star text-yellow-400 text-lg"></i> 4.9 Rating
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-users text-blue-400 text-lg"></i> <span id="hero-students">...</span> Siswa
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-book-open text-green-400 text-lg"></i> <span id="hero-modules-count">...</span> Modul
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 md:px-6 -mt-10 relative z-20">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+                        <h2 class="text-2xl font-bold text-slate-900 mb-4 border-b border-slate-100 pb-4">Tentang Kursus Ini</h2>
+                        <div id="content-desc" class="prose prose-slate max-w-none text-slate-600 leading-relaxed">
+                            <div class="animate-pulse h-4 bg-slate-200 rounded w-full mb-2"></div>
+                            <div class="animate-pulse h-4 bg-slate-200 rounded w-5/6 mb-2"></div>
+                            <div class="animate-pulse h-4 bg-slate-200 rounded w-4/6"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm">
+                        <div class="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                            <h2 class="text-2xl font-bold text-slate-900">Kurikulum Belajar</h2>
+                            <span class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg" id="module-badge">... Modul</span>
+                        </div>
+                        <div id="module-list" class="space-y-3">
+                            <div class="animate-pulse h-16 bg-slate-100 rounded-xl w-full border border-slate-200"></div>
+                            <div class="animate-pulse h-16 bg-slate-100 rounded-xl w-full border border-slate-200"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl border border-slate-200 p-1 shadow-xl sticky top-28">
+                        <div class="w-full h-48 bg-slate-100 rounded-xl overflow-hidden relative border border-slate-200">
+                            <img id="card-thumbnail" src="" alt="Thumbnail" class="w-full h-full object-cover opacity-0 transition-opacity duration-500">
+                            <div id="card-thumbnail-skeleton" class="absolute inset-0 flex items-center justify-center text-4xl text-slate-300 bg-slate-100">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="p-6">
+                            <div class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-1">Harga Spesial</div>
+                            <div id="card-price" class="text-4xl font-black text-slate-900 mb-6">Rp ...</div>
+                            
+                            <div id="cta-container" class="mb-6">
+                                <div class="animate-pulse h-12 bg-blue-200 rounded-xl w-full"></div>
+                            </div>
+
+                            <div class="space-y-4 text-sm font-medium text-slate-600 border-t border-slate-100 pt-6">
+                                <div class="flex items-center gap-3"><i class="fas fa-infinity text-blue-500 w-5 text-center"></i> Akses materi selamanya</div>
+                                <div class="flex items-center gap-3"><i class="fas fa-laptop-house text-blue-500 w-5 text-center"></i> Belajar kapan saja</div>
+                                <div class="flex items-center gap-3"><i class="fas fa-certificate text-blue-500 w-5 text-center"></i> Sertifikat Kelulusan Resmi</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</Layout>

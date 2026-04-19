@@ -1,17 +1,32 @@
-<nav class="fixed top-0 w-full bg-white/80 backdrop-blur-md border-b-4 border-primary z-50">
-    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <a href="/" class="text-3xl font-black text-primary italic">
-            LPIA<span class="text-yellow-500">.</span>
+<nav class="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl bg-white/90 backdrop-blur-md shadow-sm border border-gray-200 rounded-full z-50 transition-all">
+    <div class="px-6 py-3 flex justify-between items-center">
+        <a href="/" class="text-2xl font-bold text-blue-700 tracking-tight">
+            LPIA<span class="text-blue-500">.</span>
         </a>
         
         <div class="flex items-center gap-8">
-            <div class="hidden md:flex gap-6 font-bold text-gray-600">
-                <a href="#kursus" class="hover:text-primary transition-colors">Kursus</a>
-                <a href="#cara-daftar" class="hover:text-primary transition-colors">Cara Daftar</a>
-                <a href="#bantuan" class="hover:text-primary transition-colors">Bantuan</a>
+            <div class="hidden md:flex gap-6 font-medium text-gray-600 text-sm">
+                <a data-nav-link data-target="kursus" class="hover:text-blue-600 transition-colors">Kursus</a>
+                <a data-nav-link data-target="cara-daftar" class="hover:text-blue-600 transition-colors">Cara Daftar</a>
+                <a data-nav-link data-target="bantuan" class="hover:text-blue-600 transition-colors">Bantuan</a>
             </div>
             
-            <div id="auth-container"></div>
+            <div id="auth-container">
+                </div>
         </div>
     </div>
 </nav>
+
+<script>
+    const isHome = window.location.pathname === "/";
+  
+    document.querySelectorAll("[data-nav-link]").forEach(link => {
+      const target = link.getAttribute("data-target");
+  
+      if (isHome) {
+        link.setAttribute("href", `#${target}`);
+      } else {
+        link.setAttribute("href", `/#${target}`);
+      }
+    });
+  </script>

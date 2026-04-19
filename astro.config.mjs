@@ -8,6 +8,10 @@ export default defineConfig({
   devToolbar: {
     enabled: false,
   },
+  output: 'server',
+  server: {
+    port: 5555, // Mengubah port ke 5555
+  },
   vite: {
     plugins: [tailwindcss()]
   }

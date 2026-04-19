@@ -1,7 +1,7 @@
+// src/scripts/fetch/http.js
 import { CONFIG } from '../config/index.js';
 
 export const HTTP = {
-    // Variabel internal untuk menyimpan API mana yang "hidup"
     activeBaseUrl: null,
 
     async request(endpoint, options = {}) {
@@ -15,29 +15,32 @@ export const HTTP = {
             headers['Authorization'] = `Bearer ${token}`;
         }
 
-        // 1. Tentukan target URL (Gunakan yang sudah terdeteksi aktif, atau mulai dari Production)
+        // Ambil urutan target dari config
         const targets = this.activeBaseUrl 
             ? [this.activeBaseUrl] 
-            : [CONFIG.PRODUCTION_API, CONFIG.LOCAL_API];
+            : CONFIG.API_TARGETS;
 
-        for (const baseUrl of targets) {
+        for (let i = 0; i < targets.length; i++) {
+            const baseUrl = targets[i];
             try {
                 const response = await fetch(`${baseUrl}${endpoint}`, { 
                     ...options, 
                     headers 
                 });
 
-                // Jika berhasil, simpan baseUrl ini sebagai yang aktif agar request berikutnya cepat
                 this.activeBaseUrl = baseUrl;
                 
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-                return await response.json();
+                const data = await response.json().catch(() => ({})); 
+
+                if (!response.ok) {
+                    throw new Error(data.message || `HTTP Error: ${response.status}`);
+                }
+
+                return data;
 
             } catch (error) {
-                // Jika ini adalah target terakhir dan masih gagal, baru lempar error
-                if (baseUrl === targets[targets.length - 1]) {
-                    console.error('All API targets failed:', error);
-                    throw error;
+                if (i === targets.length - 1) {
+                    throw error; // Lempar error hanya jika semua target gagal
                 }
                 console.warn(`Gagal terhubung ke ${baseUrl}, mencoba fallback...`);
             }

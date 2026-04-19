@@ -1,0 +1,41 @@
+---
+// src/pages/courses.astro
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Katalog Kursus | LPIA">
+    <div class="min-h-screen bg-slate-50 pt-32 pb-24">
+        <div class="max-w-7xl mx-auto px-4 md:px-6">
+            
+            <div class="mb-10 text-center md:text-left">
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">Eksplorasi Kursus</h1>
+                <p class="text-slate-500 mt-2 text-lg">Temukan kelas terbaik untuk meningkatkan keahlian Anda.</p>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-10 flex flex-col md:flex-row gap-4 relative z-10">
+                
+                <div class="relative flex-grow">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="course-search-input" placeholder="Ketik nama kursus..." 
+                           class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-700">
+                </div>
+
+                <div class="relative">
+                    <select id="course-category-filter" class="w-full md:w-auto pl-4 pr-10 py-3.5 rounded-xl border border-slate-200 outline-none focus:border-blue-500 bg-white font-semibold text-slate-700 cursor-pointer appearance-none">
+                        <option value="all">Semua Kategori</option>
+                        <option value="Bahasa Inggris">Bahasa Inggris</option>
+                        <option value="Persiapan TOEFL">Persiapan TOEFL</option>
+                        <option value="Bahasa Mandarin">Bahasa Mandarin</option>
+                        <option value="General">Lainnya / General</option>
+                    </select>
+                    <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
+                </div>
+
+            </div>
+
+            <div id="courses-grid-page" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                </div>
+
+        </div>
+    </div>
+</Layout>

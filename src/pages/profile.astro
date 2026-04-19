@@ -1,0 +1,131 @@
+---
+// src/pages/profile.astro
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Profil Saya | LPIA">
+    <div id="profile-page" class="min-h-screen bg-slate-50 pt-28 pb-20">
+        <div class="max-w-7xl mx-auto px-4 md:px-6">
+            
+            <div id="profile-banner" class="bg-blue-600 rounded-3xl p-10 mb-8 text-white shadow-lg relative overflow-hidden flex items-center gap-6 transition-colors duration-500">
+                <div id="banner-bg-icon" class="absolute -right-10 -top-10 text-[15rem] opacity-20 rotate-12 pointer-events-none transition-all duration-500">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                
+                <div class="w-24 h-24 bg-white/20 backdrop-blur-md border border-white/30 rounded-3xl flex items-center justify-center text-5xl shadow-inner z-10">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="z-10">
+                    <h1 id="user-display-name" class="text-3xl md:text-4xl font-black tracking-tight mb-1">Memuat...</h1>
+                    <div id="user-display-level-badge" class="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
+                        <i class="fas fa-shield-alt"></i> <span id="user-level-text">...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div class="lg:col-span-1">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm sticky top-28">
+                        <nav class="flex flex-col space-y-1" id="profile-nav">
+                            <button data-target="section-umum" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-blue-700 bg-blue-50 border border-blue-100 shadow-sm">
+                                <i class="fas fa-user-cog w-5 text-center"></i> Pengaturan Profil
+                            </button>
+                            <button data-target="section-kursus" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+                                <i class="fas fa-play-circle w-5 text-center"></i> Kursus Saya
+                            </button>
+                            <button data-target="section-sertifikat" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+                                <i class="fas fa-file-medal w-5 text-center"></i> Sertifikat
+                            </button>
+                            <button data-target="section-riwayat" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+                                <i class="fas fa-history w-5 text-center"></i> Riwayat Transaksi
+                            </button>
+                            <div class="h-px bg-slate-100 my-2"></div>
+                            <button id="btn-logout-profile" class="flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-red-500 hover:bg-red-50">
+                                <i class="fas fa-sign-out-alt w-5 text-center"></i> Keluar Akun
+                            </button>
+                            <button data-target="section-danger" class="profile-tab mt-2 flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-red-700 bg-red-50 hover:bg-red-100 border border-red-100">
+                                <i class="fas fa-exclamation-triangle w-5 text-center"></i> Danger Zone
+                            </button>
+                        </nav>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-3 space-y-6">
+                    
+                    <div id="section-umum" class="profile-section block bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                        <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-user-edit text-blue-600"></i> Edit Informasi Profil
+                        </h2>
+                        <form id="form-update-profile" class="space-y-5 max-w-md">
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Nama Lengkap</label>
+                                <input type="text" id="input-full-name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" placeholder="Nama Anda">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-slate-700 mb-2">Email (Tidak dapat diubah)</label>
+                                <input type="email" id="input-email" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed">
+                            </div>
+                            <button type="submit" id="btn-save-profile" class="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-[0_4px_0_0_#1e40af] hover:-translate-y-0.5 active:translate-y-[4px] active:shadow-none transition-all">
+                                Simpan Perubahan
+                            </button>
+                        </form>
+                    </div>
+
+                    <template id="search-filter-template">
+                        <div class="flex flex-col md:flex-row gap-4 mb-6">
+                            <div class="relative flex-grow">
+                                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" placeholder="Cari..." class="search-input w-full pl-11 pr-4 py-2.5 rounded-xl border border-slate-200 outline-none focus:border-blue-500 transition-all">
+                            </div>
+                        </div>
+                    </template>
+
+                    <div id="section-kursus" class="profile-section hidden bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                        <h2 class="text-xl font-bold mb-6 italic">Kursus Aktif</h2>
+                        <div id="search-container-kursus"></div>
+                        <div id="my-courses-list" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+                    </div>
+
+                    <div id="section-sertifikat" class="profile-section hidden bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                        <h2 class="text-xl font-bold mb-6 italic">Sertifikat Kelulusan</h2>
+                        <div id="search-container-sertifikat"></div>
+                        <div id="my-certificates-list" class="space-y-4"></div>
+                    </div>
+
+                    <div id="section-riwayat" class="profile-section hidden bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                        <h2 class="text-xl font-bold mb-6 italic">Log Transaksi</h2>
+                        <div id="search-container-riwayat"></div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="border-b border-slate-100 text-slate-400 text-sm uppercase font-bold">
+                                    <tr>
+                                        <th class="pb-4 font-bold">Produk</th>
+                                        <th class="pb-4 font-bold">Order ID</th>
+                                        <th class="pb-4 font-bold">Status</th>
+                                        <th class="pb-4 font-bold">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transaction-table-body" class="divide-y divide-slate-50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="section-danger" class="profile-section hidden bg-red-50 border border-red-200 rounded-2xl p-8">
+                        <h2 class="text-xl font-bold text-red-700 mb-2">Danger Zone</h2>
+                        <p class="text-red-600/80 text-sm mb-6">Tindakan di bawah ini bersifat permanen dan tidak dapat dibatalkan.</p>
+                        <div class="bg-white border border-red-200 rounded-xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div>
+                                <h4 class="font-bold text-slate-900">Hapus Akun</h4>
+                                <p class="text-xs text-slate-500">Semua progres belajar dan sertifikatmu akan hilang selamanya.</p>
+                            </div>
+                            <button id="btn-delete-account" class="px-6 py-2.5 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 transition-colors shadow-sm shadow-red-200">
+                                Hapus Akun Saya
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

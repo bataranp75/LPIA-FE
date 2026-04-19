@@ -1,127 +1,145 @@
 ---
+// src/pages/index.astro
 import Layout from '../layouts/Layout.astro';
 import Carousel from '../components/Carousel.astro';
 import Button from '../components/Button.astro';
 
-const promoItems = [];
+// Array promo items
+const promoItems = [
+  {
+    id: 1,
+    image: 'https://placehold.co/1200x600/1e293b/white?text=Kelas+Bahasa+Inggris+Bisnis', 
+    tag: 'Pendaftaran Dibuka',
+    title: 'Kelas Bahasa Inggris Bisnis',
+    description: 'Tingkatkan karir global Anda dengan kemampuan komunikasi profesional. Tersedia mentor bersertifikasi.',
+    ctaText: 'Lihat Jadwal',
+    ctaHref: '#kursus'
+  },
+  {
+    id: 2,
+    image: 'https://placehold.co/1200x600/0f172a/white?text=Spesial+TOEFL+Preparation', 
+    tag: 'Diskon 20%',
+    title: 'Spesial TOEFL Preparation',
+    description: 'Dapatkan potongan harga untuk pendaftaran bulan ini. Kuota terbatas untuk 50 pendaftar pertama!',
+    ctaText: 'Klaim Promo',
+    ctaHref: '/login'
+  }
+];
 ---
 
-<Layout title="LPIA - Kursus Bahasa & Skill">
+<Layout title="LPIA - Sertifikasi & Kursus Bahasa Profesional">
 
-    <!-- ══════════════════════════════════════════
-         HERO — Flex kiri: copy  |  kanan: carousel
-    ═══════════════════════════════════════════ -->
-    <section class="w-full max-w-7xl mx-auto px-4 md:px-6 pt-24 pb-16 flex flex-col lg:flex-row items-center gap-10 lg:gap-14">
+    <section class="w-full max-w-7xl mx-auto px-4 md:px-6 pt-32 pb-20 flex flex-col lg:flex-row items-center gap-12">
 
-        <!-- KIRI: Headline + CTA -->
         <div class="flex-1 text-center lg:text-left">
-            <span class="inline-flex items-center gap-2 bg-yellow-400 border-2 border-gray-900 rounded-full px-4 py-1.5 text-xs font-black text-gray-900 mb-5">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                Kursus Online Terpercaya
+            <span class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-full px-4 py-1.5 text-xs font-semibold mb-6">
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                Platform Kursus Online Terpercaya
             </span>
 
-            <h1 class="text-5xl md:text-6xl font-black text-gray-900 leading-[1.05] tracking-tight mb-5">
-                Belajar Jadi <br/>
-                <span class="relative inline-block text-primary">
-                    Lebih Seru!
-                    <span class="absolute -bottom-1 left-0 w-full h-3 bg-yellow-400 -z-10 skew-x-2 rounded-sm"></span>
-                </span>
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 leading-[1.15] tracking-tight mb-6">
+                Tingkatkan Kompetensi Anda Bersama <span class="text-blue-600">LPIA</span>
             </h1>
 
-            <p class="text-lg text-gray-500 font-medium mb-8 max-w-md mx-auto lg:mx-0">
-                Dapatkan akses materi berkualitas dengan gaya belajar interaktif ala kuis di LPIA.
+            <p class="text-base md:text-lg text-slate-600 font-normal mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed">
+                Akses kurikulum berstandar industri dan materi interaktif untuk mempercepat perkembangan karir dan keahlian Anda.
             </p>
 
-            <div class="flex flex-wrap gap-3 justify-center lg:justify-start">
+            <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
                 <Button variant="primary" size="lg" href="#kursus">
-                    <i class="fas fa-rocket"></i> Daftar Sekarang
+                    Mulai Belajar
                 </Button>
                 <Button variant="outline" size="lg" href="#cara-daftar">
-                    Cara Daftar
+                    Lihat Panduan
                 </Button>
             </div>
         </div>
 
-        <!-- KANAN: Carousel + Stats dari DB -->
-        <div class="flex-1 w-full max-w-xl lg:max-w-none">
-            <Carousel items={promoItems} />
+        <div class="flex-1 w-full max-w-2xl lg:max-w-none">
+            <div class="shadow-xl shadow-blue-900/5 rounded-3xl overflow-hidden border border-slate-100">
+                <Carousel items={promoItems} autoplayInterval={7000} />
+            </div>
 
-            <!-- Stats Bar — diisi real dari API -->
-            <div class="mt-4 grid grid-cols-3 gap-3" id="stats-bar">
-                <!-- Skeleton loading -->
-                <div class="bg-gray-100 border-2 border-gray-200 rounded-2xl px-4 py-3 text-center animate-pulse h-16"></div>
-                <div class="bg-gray-100 border-2 border-gray-200 rounded-2xl px-4 py-3 text-center animate-pulse h-16"></div>
-                <div class="bg-gray-100 border-2 border-gray-200 rounded-2xl px-4 py-3 text-center animate-pulse h-16"></div>
+            <div class="mt-6 grid grid-cols-3 gap-4" id="stats-bar">
+                <div class="bg-white border border-slate-100 rounded-2xl px-4 py-4 text-center shadow-sm animate-pulse h-20"></div>
+                <div class="bg-white border border-slate-100 rounded-2xl px-4 py-4 text-center shadow-sm animate-pulse h-20"></div>
+                <div class="bg-white border border-slate-100 rounded-2xl px-4 py-4 text-center shadow-sm animate-pulse h-20"></div>
             </div>
         </div>
     </section>
 
-    <!-- ══════════════════════════════
-         KURSUS SECTION
-    ═══════════════════════════════ -->
-    <section id="kursus" class="max-w-7xl mx-auto px-4 md:px-6 py-20">
-        <div class="text-center mb-12">
-            <h2 class="text-4xl font-black text-gray-900 uppercase tracking-tighter">Pilih Kursusmu</h2>
-            <div class="h-2 w-24 bg-yellow-400 mx-auto mt-2 rounded-full"></div>
-        </div>
-        <div id="course-list" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Skeleton cards -->
-            {[1,2,3].map(() => (
-                <div class="bg-gray-100 rounded-2xl h-72 animate-pulse border-2 border-gray-200"></div>
-            ))}
+    <section id="kursus" class="bg-slate-50 py-24">
+        <div class="max-w-7xl mx-auto px-4 md:px-6">
+            
+            <div class="flex items-center justify-between mb-16">
+                <div>
+                    <h2 class="text-3xl font-bold text-slate-900 tracking-tight">
+                        Program Kursus Unggulan
+                    </h2>
+                    <p class="text-slate-500 mt-4 max-w-xl">
+                        Pilih dari berbagai program yang dirancang khusus untuk memenuhi kebutuhan profesional Anda.
+                    </p>
+                </div>
+    
+                <a href="/courses" class="text-sm font-semibold text-blue-600 hover:text-blue-700 transition">
+                    Lihat Semua →
+                </a>
+            </div>
+            
+            <div id="course-list" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[1,2,3].map(() => (
+                    <div class="bg-white rounded-2xl h-80 animate-pulse border border-slate-200 shadow-sm"></div>
+                ))}
+            </div>
+    
         </div>
     </section>
 
-    <!-- ══════════════════════════════
-         CARA DAFTAR
-    ═══════════════════════════════ -->
-    <section id="cara-daftar" class="max-w-5xl mx-auto px-4 md:px-6 py-20">
-        <div class="bg-primary p-1 rounded-3xl rotate-1">
-            <div class="bg-white rounded-[1.4rem] p-10 -rotate-1 border-4 border-gray-900">
-                <h2 class="text-3xl font-black mb-10 text-center italic text-primary">Gampang Banget Buat Gabung!</h2>
-                <div class="grid md:grid-cols-3 gap-8">
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center text-2xl font-black mx-auto mb-4 border-4 border-gray-900">1</div>
-                        <h4 class="font-bold text-lg mb-1">Pilih Kelas</h4>
-                        <p class="text-sm text-gray-500">Cari kursus yang sesuai minat dan levelmu.</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-2xl font-black mx-auto mb-4 border-4 border-gray-900 text-white">2</div>
-                        <h4 class="font-bold text-lg mb-1">Pembayaran</h4>
-                        <p class="text-sm text-gray-500">Selesaikan transaksi secara aman & cepat.</p>
-                    </div>
-                    <div class="text-center">
-                        <div class="w-16 h-16 bg-green-400 rounded-full flex items-center justify-center text-2xl font-black mx-auto mb-4 border-4 border-gray-900 text-white">3</div>
-                        <h4 class="font-bold text-lg mb-1">Mulai Belajar</h4>
-                        <p class="text-sm text-gray-500">Akses modul dan kerjakan kuis interaktifnya!</p>
-                    </div>
+    <section id="cara-daftar" class="max-w-7xl mx-auto px-4 md:px-6 py-24">
+        <div class="bg-blue-600 rounded-3xl p-8 md:p-14 text-center overflow-hidden relative">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-50 translate-x-1/2 -translate-y-1/2"></div>
+            
+            <h2 class="text-3xl font-bold mb-14 text-white relative z-10">Langkah Mudah Memulai Belajar</h2>
+            
+            <div class="grid md:grid-cols-3 gap-10 relative z-10">
+                <div class="bg-white/10 backdrop-blur-sm p-8 rounded-2xl border border-white/20 text-white hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-xl font-bold mx-auto mb-6">1</div>
+                    <h4 class="font-semibold text-lg mb-3">Pilih Kelas</h4>
+                    <p class="text-blue-100 text-sm leading-relaxed">Temukan kursus yang sesuai dengan target karir dan kemampuan awal Anda.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm p-8 rounded-2xl border border-white/20 text-white hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-xl font-bold mx-auto mb-6">2</div>
+                    <h4 class="font-semibold text-lg mb-3">Selesaikan Pembayaran</h4>
+                    <p class="text-blue-100 text-sm leading-relaxed">Lakukan pembayaran melalui sistem yang aman, cepat, dan terverifikasi.</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm p-8 rounded-2xl border border-white/20 text-white hover:-translate-y-2 transition-transform duration-300">
+                    <div class="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center text-xl font-bold mx-auto mb-6">3</div>
+                    <h4 class="font-semibold text-lg mb-3">Mulai Belajar</h4>
+                    <p class="text-blue-100 text-sm leading-relaxed">Akses modul pembelajaran interaktif dan dapatkan sertifikat setelah lulus.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- ══════════════════════════════
-         FAQ
-    ═══════════════════════════════ -->
-    <section id="bantuan" class="max-w-3xl mx-auto px-4 md:px-6">
-        <h2 class="text-3xl font-black text-center mb-10 text-gray-900">Sering Ditanyakan (FAQ)</h2>
+    <section id="bantuan" class="max-w-3xl mx-auto px-4 md:px-6 pb-24">
+        <h2 class="text-3xl font-bold text-center mb-12 text-slate-900 tracking-tight">Pertanyaan Seputar LPIA</h2>
         <div class="space-y-4">
-            <details class="group bg-white border-4 border-gray-900 rounded-2xl p-4 cursor-pointer open:bg-blue-50 transition-colors">
-                <summary class="flex justify-between items-center font-black text-lg text-gray-700 list-none">
-                    Apa itu LPIA LMS?
-                    <i class="fas fa-chevron-down group-open:rotate-180 transition-transform"></i>
+            <details class="group bg-white border border-slate-200 shadow-sm rounded-xl p-5 cursor-pointer open:ring-2 open:ring-blue-100 transition-all">
+                <summary class="flex justify-between items-center font-semibold text-slate-800 list-none">
+                    Apa itu Platform LPIA LMS?
+                    <i class="fas fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
                 </summary>
-                <p class="mt-4 font-medium text-gray-600 border-t-2 border-dashed border-gray-200 pt-4">
-                    LPIA LMS adalah platform belajar kursus yang menggunakan sistem manajemen pembelajaran modern dengan tampilan menyenangkan ala "Back to School".
+                <p class="mt-4 text-slate-600 text-sm leading-relaxed border-t border-slate-100 pt-4">
+                    LPIA LMS adalah platform pembelajaran digital resmi dari Lembaga Pendidikan Indonesia Amerika yang dirancang untuk memberikan pengalaman belajar interaktif dan terstruktur bagi siswa maupun profesional.
                 </p>
             </details>
-            <details class="group bg-white border-4 border-gray-900 rounded-2xl p-4 cursor-pointer open:bg-blue-50 transition-colors">
-                <summary class="flex justify-between items-center font-black text-lg text-gray-700 list-none">
-                    Bagaimana cara mendapatkan sertifikat?
-                    <i class="fas fa-chevron-down group-open:rotate-180 transition-transform"></i>
+            <details class="group bg-white border border-slate-200 shadow-sm rounded-xl p-5 cursor-pointer open:ring-2 open:ring-blue-100 transition-all">
+                <summary class="flex justify-between items-center font-semibold text-slate-800 list-none">
+                    Bagaimana prosedur mendapatkan sertifikat?
+                    <i class="fas fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform"></i>
                 </summary>
-                <p class="mt-4 font-medium text-gray-600 border-t-2 border-dashed border-gray-200 pt-4">
-                    Setelah menyelesaikan semua modul dan lulus ujian, kamu bisa mendownload sertifikat otomatis dalam format PDF.
+                <p class="mt-4 text-slate-600 text-sm leading-relaxed border-t border-slate-100 pt-4">
+                    Sertifikat resmi akan diterbitkan secara otomatis setelah Anda menyelesaikan seluruh modul pembelajaran dan berhasil melewati ambang batas nilai kelulusan pada kuis akhir. Sertifikat dapat diunduh dalam format PDF.
                 </p>
             </details>
         </div>

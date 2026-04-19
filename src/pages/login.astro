@@ -1,40 +1,48 @@
 ---
+// src/pages/login.astro
 import Layout from '../layouts/Layout.astro';
 ---
 
 <Layout title="Masuk / Daftar | LPIA">
-    <section class="min-h-[80vh] flex items-center justify-center px-6 py-24">
-        <div class="bg-white border-4 border-gray-800 p-8 rounded-3xl shadow-[12px_12px_0_#1f2937] max-w-md w-full auth-form">
+    <section class="min-h-screen flex items-center justify-center px-4 py-20 bg-slate-50 relative overflow-hidden">
+        
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-96 bg-blue-600/5 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+        <div class="bg-white border border-slate-200 p-8 sm:p-10 rounded-2xl shadow-xl shadow-slate-200/50 max-w-md w-full auth-form relative z-10">
+            
             <div class="text-center mb-8">
-                <h1 id="auth-title" class="text-3xl font-black text-gray-800 italic">Masuk ke LPIA</h1>
-                <p class="text-gray-500 font-bold">Ayo lanjut belajar skill barumu!</p>
+                <div class="w-12 h-12 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4 text-blue-600 text-xl shadow-sm">
+                    <i class="fas fa-user-lock"></i>
+                </div>
+                
+                <h1 id="auth-title" class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Masuk ke LPIA</h1>
+                <p class="text-slate-500 text-sm mt-2">Akses modul interaktif dan kembangkan karirmu.</p>
             </div>
 
             <form id="auth-form" class="space-y-5">
                 <div id="name-field" class="hidden">
-                    <label class="block mb-2 font-black text-gray-700">Nama Lengkap</label>
-                    <input type="text" name="full_name" class="input-field" placeholder="Masukkan nama lengkap">
+                    <label class="block mb-1.5 font-semibold text-sm text-slate-700">Nama Lengkap</label>
+                    <input type="text" name="full_name" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white outline-none placeholder-slate-400" placeholder="Masukkan nama lengkap">
                 </div>
 
                 <div>
-                    <label class="block mb-2 font-black text-gray-700">Email</label>
-                    <input type="email" name="email" required class="input-field" placeholder="contoh@mail.com">
+                    <label class="block mb-1.5 font-semibold text-sm text-slate-700">Email Address</label>
+                    <input type="email" name="email" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white outline-none placeholder-slate-400" placeholder="contoh@email.com">
                 </div>
 
                 <div>
-                    <label class="block mb-2 font-black text-gray-700">Password</label>
-                    <input type="password" name="password" required class="input-field" placeholder="••••••••">
+                    <label class="block mb-1.5 font-semibold text-sm text-slate-700">Password</label>
+                    <input type="password" name="password" required class="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-slate-900 text-sm transition-all focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white outline-none placeholder-slate-400" placeholder="••••••••">
                 </div>
 
-                <button type="submit" id="submit-btn" class="w-full btn-school py-4 text-lg">
+                <button type="submit" id="submit-btn" class="w-full mt-2 inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 px-6 py-3 text-base bg-blue-600 text-white shadow-[0_3px_0_0_#1e40af] hover:bg-blue-700 hover:-translate-y-0.5 active:translate-y-[3px] active:shadow-none border border-blue-700">
                     Masuk
                 </button>
             </form>
 
-            <div class="mt-8 text-center border-t-2 border-dashed border-gray-200 pt-6">
-                <p class="font-bold text-gray-600">
-                    Belum punya akun? 
-                    <a href="#" class="toggle-auth text-primary hover:underline">Daftar Sekarang</a>
+            <div class="mt-8 text-center border-t border-slate-100 pt-6">
+                <p class="text-sm text-slate-600">
+                    Belum punya akun? <a href="#" class="toggle-auth text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors">Daftar Sekarang</a>
                 </p>
             </div>
         </div>
@@ -42,20 +50,17 @@ import Layout from '../layouts/Layout.astro';
 </Layout>
 
 <style>
-    /* Pastikan path ini benar sesuai struktur folder kamu */
-    @reference "../styles/global.css";
-
-    .input-field {
-        @apply w-full border-[3px] border-gray-300 rounded-xl px-4 py-3 text-gray-900 font-medium transition-all;
-        @apply focus:border-primary focus:bg-blue-50/30 outline-none placeholder-gray-400;
-    }
-
+    /* Animasi fade in slide up yang lebih mulus */
     .auth-form {
-        animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+        transform: translateY(20px);
     }
 
     @keyframes slideUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
+        to { 
+            transform: translateY(0); 
+            opacity: 1; 
+        }
     }
 </style>
