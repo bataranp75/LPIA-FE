@@ -258,48 +258,79 @@ export const LandingDOM = {
         const authContainer = document.getElementById('auth-container');
         if (!authContainer) return;
 
-        const token    = localStorage.getItem('lpia_user_token');
-        const userData = JSON.parse(localStorage.getItem('lpia_user_data') || '{}');
+        const token = localStorage.getItem('lpia_user_token');
+        const userDataStr = localStorage.getItem('lpia_user_data');
 
-        if (token) {
-            // STATE LOGIN: Tampilkan Nama (Link ke Profile) & Tombol Logout
-            authContainer.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <a href="/profile" class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-full px-4 py-2 cursor-pointer hover:bg-blue-100 transition-colors shadow-sm group">
-                        <i class="fas fa-user-circle text-xl text-blue-600 group-hover:scale-110 transition-transform duration-200"></i>
-                        <span class="font-semibold text-slate-800 text-sm group-hover:text-blue-700">${userData.full_name || 'Siswa'}</span>
-                    </a>
-                    
-                    ${this.getButtonHTML({
-                        text: '', 
-                        variant: 'danger',
-                        size: 'icon',
-                        extraClass: '!rounded-full', // Memaksa agar bentuknya bulat penuh
-                        dataId: 'logout-btn',
-                        icon: 'fas fa-sign-out-alt'
-                    })}
-                </div>
-            `;
+        if (token && userDataStr) {
+            const userData = JSON.parse(userDataStr);
 
-            // Event Listener Tombol Logout
-            document.querySelector('[data-id="logout-btn"]')?.addEventListener('click', () => {
+            // 1. KONDISI JIKA USER ADALAH ADMIN
+            if (userData.role === 'admin') {
+                authContainer.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <a href="/admin/courses" class="inline-flex items-center justify-center gap-2 font-bold rounded-full bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 text-sm transition-all duration-200 shadow-sm">
+                            <i class="fas fa-user-shield"></i> Dashboard Admin
+                        </a>
+                        
+                        <button id="logout-btn" class="inline-flex items-center justify-center gap-2 font-semibold rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 text-sm transition-all duration-200">
+                            <i class="fas fa-sign-out-alt"></i> Keluar
+                        </button>
+                    </div>
+                `;
+            } 
+            
+            // 2. KONDISI JIKA USER ADALAH GURU
+            else if (userData.role === 'guru') {
+                authContainer.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <a href="/guru/dashboard" class="inline-flex items-center justify-center gap-2 font-bold rounded-full bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 text-sm transition-all duration-200 shadow-sm">
+                            <i class="fas fa-chalkboard-teacher"></i> Dashboard Guru
+                        </a>
+
+                        <button id="logout-btn" class="inline-flex items-center justify-center gap-2 font-semibold rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 text-sm transition-all duration-200">
+                            <i class="fas fa-sign-out-alt"></i> Keluar
+                        </button>
+                    </div>
+                `;
+            } 
+            
+            // 3. KONDISI JIKA USER BIASA (SISWA)
+            else {
+                authContainer.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-full">
+                            <div class="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-black">
+                                ${userData.full_name ? userData.full_name.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <span class="text-sm font-bold text-slate-700 max-w-[120px] truncate">
+                                ${userData.full_name || 'User'}
+                            </span>
+                        </div>
+                        
+                        <button id="logout-btn" class="inline-flex items-center justify-center gap-2 font-semibold rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 text-sm transition-all duration-200">
+                            Keluar
+                        </button>
+                    </div>
+                `;
+            }
+
+            // Event Listener Logout
+            document.getElementById('logout-btn')?.addEventListener('click', () => {
                 Swal.fire({
-                    title: 'Keluar dari LPIA?',
-                    text: 'Kamu harus login lagi nanti untuk mengakses kelasmu.',
-                    icon: 'question',
+                    title: 'Apakah Anda yakin?',
+                    text: "Anda akan keluar dari sesi ini.",
+                    icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonColor: '#dc2626', // red-600 Tailwind
-                    cancelButtonColor: '#94a3b8', // slate-400 Tailwind
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
                     confirmButtonText: 'Ya, Keluar',
                     cancelButtonText: 'Batal',
-                    reverseButtons: true // Menukar posisi tombol agar "Batal" di kiri
+                    reverseButtons: true
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Hapus sesi dari localStorage
                         localStorage.removeItem('lpia_user_token');
                         localStorage.removeItem('lpia_user_data');
                         
-                        // Notifikasi sukses sebentar lalu refresh halaman
                         Swal.fire({
                             title: 'Berhasil Keluar',
                             text: 'Sampai jumpa lagi!',
@@ -314,15 +345,15 @@ export const LandingDOM = {
             });
 
         } else {
-            // STATE LOGOUT: Tampilkan tombol Login / Daftar
+            // STATE LOGOUT
             authContainer.innerHTML = this.getButtonHTML({
                 text: 'Login / Daftar',
                 variant: 'primary',
-                size: 'sm', 
+                size: 'sm',
                 extraClass: '',
                 dataId: 'login-btn'
             });
-            
+
             document.querySelector('[data-id="login-btn"]')?.addEventListener('click', () => {
                 window.location.href = '/login';
             });

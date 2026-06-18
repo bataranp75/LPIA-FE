@@ -1,0 +1,53 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Manajemen Akses">
+    <section id="admin-access-page">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <div class="flex items-start gap-3">
+                <button id="admin-sidebar-toggle" class="lg:hidden w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div>
+                    <h1 class="text-3xl font-black">Manajemen Akun & Akses</h1>
+                    <p class="text-slate-500 mt-1">Kelola akun siswa, guru, dan permission CRUD guru.</p>
+                </div>
+            </div>
+
+            <button id="btn-open-create-teacher" class="hidden px-5 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+                <i class="fas fa-plus mr-2"></i> Buat Akun Guru
+            </button>
+        </div>
+
+        <div class="flex gap-2 mb-4 bg-slate-100 p-1 rounded-xl w-fit">
+            <button id="tab-siswa" class="role-tab px-5 py-2 rounded-lg text-sm font-bold bg-white text-blue-600 shadow-sm">
+                Siswa
+            </button>
+            <button id="tab-guru" class="role-tab px-5 py-2 rounded-lg text-sm font-bold text-slate-500">
+                Guru
+            </button>
+        </div>
+
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-600">
+                        <tr>
+                            <th class="p-4 text-left">Nama</th>
+                            <th class="p-4 text-left">Role</th>
+                            <th class="p-4 text-left">Materi</th>
+                            <th class="p-4 text-left">Sertifikat</th>
+                            <th class="p-4 text-left">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accounts-table-body" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <div id="modal-root"></div>
+
+</AdminLayout>

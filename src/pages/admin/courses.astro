@@ -1,0 +1,28 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Manajemen Kursus">
+    <section id="admin-courses-page">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            <div class="flex items-start gap-4">
+                <button id="admin-sidebar-toggle" class="lg:hidden w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div>
+                    <h1 class="text-3xl font-black">Manajemen Kursus</h1>
+                    <p class="text-slate-500 mt-1">Kelola kursus, guru pengampu, murid, modul, dan review materi.</p>
+                </div>
+            </div>
+
+            <button id="btn-create-course" class="px-5 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+                <i class="fas fa-plus mr-2"></i> Buat Kursus
+            </button>
+        </div>
+
+        <div id="courses-grid" class="grid grid-cols-1 xl:grid-cols-2 gap-6"></div>
+
+        <div id="modal-root"></div>
+    </section>
+</AdminLayout>

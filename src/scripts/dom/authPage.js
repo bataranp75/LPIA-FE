@@ -8,7 +8,11 @@ export const AuthDOM = {
         this.form = document.getElementById('auth-form');
         this.authTitle = document.getElementById('auth-title');
         this.submitBtn = document.getElementById('submit-btn');
+        this.tabUser = document.getElementById('tab-user');
+        this.tabStaff = document.getElementById('tab-staff');
+
         this.isLogin = true;
+        this.loginType = 'user';
 
         if (this.form) {
             this.addEventListeners();
@@ -16,14 +20,28 @@ export const AuthDOM = {
     },
 
     addEventListeners() {
-        // Gunakan event delegation atau pastikan elemen ada
-        const toggleBtns = document.querySelectorAll('.toggle-auth');
-        toggleBtns.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.isLogin = !this.isLogin;
-                this.updateUI();
-            });
+        document.addEventListener('click', (e) => {
+            const toggleBtn = e.target.closest('.toggle-auth');
+            if (!toggleBtn) return;
+
+            e.preventDefault();
+
+            if (this.loginType === 'staff') return;
+
+            this.isLogin = !this.isLogin;
+            this.updateUI();
+        });
+
+        this.tabUser?.addEventListener('click', () => {
+            this.loginType = 'user';
+            this.isLogin = true;
+            this.updateUI();
+        });
+
+        this.tabStaff?.addEventListener('click', () => {
+            this.loginType = 'staff';
+            this.isLogin = true;
+            this.updateUI();
         });
 
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
@@ -31,29 +49,68 @@ export const AuthDOM = {
 
     updateUI() {
         const nameField = document.getElementById('name-field');
-        const toggleText = document.querySelector('.toggle-auth');
-        const toggleContainer = toggleText?.parentElement;
+        const toggleContainer = document.querySelector('.toggle-auth')?.parentElement;
+
+        // Reset tab style
+        this.tabUser?.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+        this.tabUser?.classList.add('text-slate-500');
+
+        this.tabStaff?.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+        this.tabStaff?.classList.add('text-slate-500');
+
+        // Active tab style
+        if (this.loginType === 'user') {
+            this.tabUser?.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+            this.tabUser?.classList.remove('text-slate-500');
+        } else {
+            this.tabStaff?.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+            this.tabStaff?.classList.remove('text-slate-500');
+        }
+
+        if (this.loginType === 'staff') {
+            this.authTitle.innerText = 'Login Guru / Admin';
+            this.submitBtn.innerText = 'Masuk Staff';
+            nameField?.classList.add('hidden');
+            nameField?.querySelector('input')?.removeAttribute('required');
+
+            if (toggleContainer) {
+                toggleContainer.innerHTML = `
+                    <span class="text-slate-500">Khusus akun Guru dan Admin.</span>
+                `;
+            }
+
+            return;
+        }
 
         if (this.isLogin) {
             this.authTitle.innerText = 'Masuk ke LPIA';
             this.submitBtn.innerText = 'Masuk';
             nameField?.classList.add('hidden');
-            if(nameField) nameField.querySelector('input').removeAttribute('required');
-            
-            // Perbarui class Tailwind pada link
-            if(toggleContainer) toggleContainer.innerHTML = 'Belum punya akun? <a href="#" class="toggle-auth text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors">Daftar Sekarang</a>';
+            nameField?.querySelector('input')?.removeAttribute('required');
+
+            if (toggleContainer) {
+                toggleContainer.innerHTML = `
+                    Belum punya akun? 
+                    <a href="#" class="toggle-auth text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors">
+                        Daftar Sekarang
+                    </a>
+                `;
+            }
         } else {
             this.authTitle.innerText = 'Daftar Akun Baru';
             this.submitBtn.innerText = 'Daftar';
             nameField?.classList.remove('hidden');
-            if(nameField) nameField.querySelector('input').setAttribute('required', 'true');
-            
-            // Perbarui class Tailwind pada link
-            if(toggleContainer) toggleContainer.innerHTML = 'Sudah punya akun? <a href="#" class="toggle-auth text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors">Masuk Sekarang</a>';
-        }
+            nameField?.querySelector('input')?.setAttribute('required', 'true');
 
-        // Re-attach listener karena innerHTML diubah
-        this.addEventListeners();
+            if (toggleContainer) {
+                toggleContainer.innerHTML = `
+                    Sudah punya akun? 
+                    <a href="#" class="toggle-auth text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors">
+                        Masuk Sekarang
+                    </a>
+                `;
+            }
+        }
     },
 
     async handleSubmit(e) {
@@ -72,8 +129,14 @@ export const AuthDOM = {
 
         try {
             this.setLoading(true);
-            const endpoint = this.isLogin ? '/auth/login' : '/auth/register';
-            
+            let endpoint = '/auth/login';
+
+            if (this.loginType === 'staff') {
+                endpoint = '/auth/staff/login';
+            } else if (!this.isLogin) {
+                endpoint = '/auth/register';
+            }
+
             const response = await HTTP.post(endpoint, payload);
 
             if (response.status === 'success' || response.message?.includes('berhasil')) {
@@ -82,11 +145,13 @@ export const AuthDOM = {
                     localStorage.setItem(CONFIG.USER_INFO, JSON.stringify(response.user));
 
                     Swal.fire({
-                        title: 'Berhasil Masuk!', 
-                        text: `Selamat datang kembali, ${response.user.full_name}`, 
+                        title: this.loginType === 'admin' ? 'Berhasil Masuk Admin!' : 'Berhasil Masuk!',
+                        text: `Selamat datang kembali, ${response.user.full_name}`,
                         icon: 'success',
                         confirmButtonColor: '#2563eb'
-                    }).then(() => window.location.href = '/');
+                    }).then(() => {
+                        window.location.href = response.redirect_url || '/';
+                    });
                 } else {
                     Swal.fire({
                         title: 'Pendaftaran Berhasil!', 
@@ -148,3 +213,5 @@ export const AuthDOM = {
             (this.isLogin ? 'Masuk' : 'Daftar');
     }
 };
+
+

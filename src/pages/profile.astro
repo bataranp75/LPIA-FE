@@ -25,25 +25,36 @@ import Layout from '../layouts/Layout.astro';
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <div class="lg:col-span-1">
-                    <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm sticky top-28">
-                        <nav class="flex flex-col space-y-1" id="profile-nav">
-                            <button data-target="section-umum" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-blue-700 bg-blue-50 border border-blue-100 shadow-sm">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-3 shadow-sm sticky top-28 z-0">
+                        
+                        <button id="mobile-menu-toggle" class="lg:hidden flex items-center justify-between w-full px-4 py-3.5 text-left rounded-xl font-bold text-sm text-blue-700 bg-blue-50 border border-blue-100 shadow-sm">
+                            <span id="mobile-menu-text" class="flex items-center gap-3">
+                                <i class="fas fa-user-cog w-5 text-center"></i> Pengaturan Profil
+                            </span>
+                            <i class="fas fa-chevron-down transition-transform duration-300" id="mobile-menu-icon"></i>
+                        </button>
+
+                        <nav class="hidden lg:flex flex-col space-y-1 absolute lg:relative left-0 right-0 top-full mt-2 lg:mt-0 p-3 lg:p-0 bg-white lg:bg-transparent border border-slate-200 lg:border-none rounded-2xl shadow-lg lg:shadow-none z-20 lg:z-auto" id="profile-nav">
+                            
+                            <button data-target="section-umum" data-text="Pengaturan Profil" data-icon="fa-user-cog" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-blue-700 bg-blue-50 border border-blue-100 shadow-sm">
                                 <i class="fas fa-user-cog w-5 text-center"></i> Pengaturan Profil
                             </button>
-                            <button data-target="section-kursus" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+                            <button data-target="section-kursus" data-text="Kursus Saya" data-icon="fa-play-circle" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
                                 <i class="fas fa-play-circle w-5 text-center"></i> Kursus Saya
                             </button>
-                            <button data-target="section-sertifikat" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
-                                <i class="fas fa-file-medal w-5 text-center"></i> Sertifikat
+                            <button data-target="section-sertifikat" data-text="Sertifikat" data-icon="fa-certificate" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+                                <i class="fas fa-certificate w-5 text-center"></i> Sertifikat
                             </button>
-                            <button data-target="section-riwayat" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
+                            <button data-target="section-riwayat" data-text="Riwayat Transaksi" data-icon="fa-history" class="profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent">
                                 <i class="fas fa-history w-5 text-center"></i> Riwayat Transaksi
                             </button>
+                            
                             <div class="h-px bg-slate-100 my-2"></div>
+                            
                             <button id="btn-logout-profile" class="flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-red-500 hover:bg-red-50">
                                 <i class="fas fa-sign-out-alt w-5 text-center"></i> Keluar Akun
                             </button>
-                            <button data-target="section-danger" class="profile-tab mt-2 flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-red-700 bg-red-50 hover:bg-red-100 border border-red-100">
+                            <button data-target="section-danger" data-text="Danger Zone" data-icon="fa-exclamation-triangle" class="profile-tab mt-2 flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-red-700 bg-red-50 hover:bg-red-100 border border-red-100">
                                 <i class="fas fa-exclamation-triangle w-5 text-center"></i> Danger Zone
                             </button>
                         </nav>
@@ -100,7 +111,6 @@ import Layout from '../layouts/Layout.astro';
                                 <thead class="border-b border-slate-100 text-slate-400 text-sm uppercase font-bold">
                                     <tr>
                                         <th class="pb-4 font-bold">Produk</th>
-                                        <th class="pb-4 font-bold">Order ID</th>
                                         <th class="pb-4 font-bold">Status</th>
                                         <th class="pb-4 font-bold">Total</th>
                                     </tr>

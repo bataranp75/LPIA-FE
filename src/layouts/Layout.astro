@@ -5,9 +5,11 @@ import Footer from '../components/Footer.astro';
 
 interface Props {
 	title: string;
+	showNavbar?: boolean;
+	showFooter?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, showNavbar = true, showFooter = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -17,19 +19,22 @@ const { title } = Astro.props;
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<title>{title} | LPIA LMS</title>
-		
+
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 		<link href="https://fonts.googleapis.com/css2?family=Itim&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
-		
+
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 	</head>
+
 	<body class="bg-dots min-h-screen flex flex-col">
-		<Navbar />
+		{showNavbar && <Navbar />}
+
 		<main class="flex-grow">
 			<slot />
 		</main>
-		<Footer />
+
+		{showFooter && <Footer />}
 
 		<script>
 			import '../scripts/main.js';

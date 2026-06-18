@@ -33,3 +33,161 @@ body {
          shadow-[0_4px_0_#1d4ed8] active:shadow-none active:translate-y-1 
          transition-all font-bold;
 }
+
+.permission-switch:checked + .switch-ui {
+  background-color: #2563eb;
+}
+
+.permission-switch:checked + .switch-ui .switch-dot {
+  transform: translateX(20px);
+}
+
+#app-toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  pointer-events: none;
+}
+
+#app-toast-container .toastify {
+  position: relative !important;
+  top: auto !important;
+  right: auto !important;
+  left: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  width: 100%;
+  max-width: 100%;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 16px !important;
+  pointer-events: auto;
+}
+
+.app-toast-content {
+  display: grid;
+  grid-template-columns: 36px 1fr 28px;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  color: white;
+  font-family: 'Montserrat', sans-serif;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+}
+
+.app-toast-icon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 18px;
+}
+
+.app-toast-message {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.app-toast-close {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  cursor: pointer;
+}
+
+.app-toast-success .app-toast-content {
+  background: #16a34a;
+}
+
+.app-toast-error .app-toast-content {
+  background: #dc2626;
+}
+
+.app-toast-warning .app-toast-content {
+  background: #f59e0b;
+}
+
+.thin-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15, 23, 42, 0.25) transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+    height: 5px;
+    width: 5px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.25);
+    border-radius: 999px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(15, 23, 42, 0.4);
+}
+
+.dragging-card {
+    opacity: 0.55;
+    transform: scale(0.98);
+}
+
+.dragging-card {
+    opacity: 0.45;
+    transform: scale(0.97);
+}
+
+.drag-over-card {
+    outline: 3px dashed rgba(16, 185, 129, 0.55);
+    outline-offset: 4px;
+    background: rgba(209, 250, 229, 0.75) !important;
+    transform: translateY(-2px);
+}
+
+.module-draggable,
+.material-draggable {
+    cursor: grab;
+    transition: 
+        transform 180ms ease,
+        opacity 180ms ease,
+        background 180ms ease,
+        outline 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.module-draggable:active,
+.material-draggable:active {
+    cursor: grabbing;
+}
+
+.question-tab-btn {
+    transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
+}
+
+.bulk-question-card {
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.bulk-question-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(168, 85, 247, 0.25);
+    box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+}

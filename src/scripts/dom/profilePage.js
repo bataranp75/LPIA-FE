@@ -22,6 +22,7 @@ export const ProfileDOM = {
         this.initSearchFilters();
         this.initDangerZone();
         this.initLogout(); 
+        this.initMobileMenu();
         
         // Load data initial
         this.loadProfileData();
@@ -33,22 +34,53 @@ export const ProfileDOM = {
     // ─────────────────────────────────────────────────────────
     //  UI & TABS LOGIC
     // ─────────────────────────────────────────────────────────
-    initTabs() {
+    initMobileMenu() {
+        const toggleBtn = document.getElementById('mobile-menu-toggle');
+        const nav = document.getElementById('profile-nav');
+        const icon = document.getElementById('mobile-menu-icon');
+
+        if (toggleBtn && nav) {
+            toggleBtn.addEventListener('click', () => {
+                nav.classList.toggle('hidden');
+                nav.classList.toggle('flex');
+                icon.classList.toggle('rotate-180');
+            });
+        }
+    },
+
+initTabs() {
         const tabs = document.querySelectorAll('.profile-tab:not(#btn-logout-profile)');
         const sections = document.querySelectorAll('.profile-section');
+        const nav = document.getElementById('profile-nav');
+        const mobileText = document.getElementById('mobile-menu-text');
+        const mobileIcon = document.getElementById('mobile-menu-icon');
 
         tabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
                 const targetId = e.currentTarget.dataset.target;
+                const text = e.currentTarget.dataset.text;
+                const iconClass = e.currentTarget.dataset.icon;
 
-                // Jangan ubah warna tab danger zone
+                // Update teks dan icon pada tombol dropdown mobile
+                if (mobileText && text && iconClass) {
+                    mobileText.innerHTML = `<i class="fas ${iconClass} w-5 text-center"></i> ${text}`;
+                }
+
+                // Tutup dropdown otomatis di mode mobile setelah menu diklik
+                if (window.innerWidth < 1024 && nav) { // 1024px adalah breakpoint lg di Tailwind
+                    nav.classList.add('hidden');
+                    nav.classList.remove('flex');
+                    mobileIcon?.classList.remove('rotate-180');
+                }
+
+                // Logika ganti tab Danger Zone
                 if(targetId === 'section-danger') {
                     sections.forEach(sec => sec.classList.add('hidden'));
                     document.getElementById(targetId)?.classList.remove('hidden');
                     return;
                 }
 
-                // Reset warna semua tab biasa
+                // Reset warna semua tab biasa (menggunakan w-full)
                 tabs.forEach(t => {
                     if (t.dataset.target !== 'section-danger') {
                         t.className = 'profile-tab flex items-center gap-3 px-4 py-3.5 text-left rounded-xl transition-all font-bold text-sm w-full text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-transparent';
@@ -197,13 +229,13 @@ export const ProfileDOM = {
         const body = document.getElementById('transaction-table-body');
         if (!body) return;
         if (!data || data.length === 0) {
-            body.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-500 text-sm">Tidak ada transaksi ditemukan.</td></tr>`;
+            // Ubah colspan menjadi 3 karena Order ID dihapus
+            body.innerHTML = `<tr><td colspan="3" class="text-center py-6 text-slate-500 text-sm">Tidak ada transaksi ditemukan.</td></tr>`;
             return;
         }
         body.innerHTML = data.map(t => `
             <tr class="hover:bg-slate-50 transition-colors">
                 <td class="py-4 font-bold text-slate-800">${t.courses?.title || 'Produk'}</td>
-                <td class="py-4 text-xs font-mono text-slate-400">${t.order_id}</td>
                 <td class="py-4">
                     <span class="px-2 py-1 rounded-md text-[10px] font-black uppercase ${t.status_pembayaran === 'success' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${t.status_pembayaran}</span>
                 </td>
@@ -211,7 +243,6 @@ export const ProfileDOM = {
             </tr>
         `).join('');
     },
-
     // ─────────────────────────────────────────────────────────
     //  INTERACTIONS (SEARCH, UPDATE, DELETE, LOGOUT)
     // ─────────────────────────────────────────────────────────

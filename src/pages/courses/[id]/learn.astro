@@ -1,0 +1,100 @@
+---
+// src/pages/courses/[id]/learn.astro
+export const prerender = false;
+import Layout from '../../../layouts/Layout.astro';
+---
+
+<Layout title="Masuk / Daftar" showNavbar={false}>
+    <nav class="fixed top-0 w-full bg-slate-900 border-b border-slate-800 z-50">
+        <div class="max-w-[1400px] mx-auto px-4 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-4 text-white">
+                <a href="/profile" class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center hover:bg-slate-700 transition-colors">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 id="top-course-title" class="font-bold tracking-tight line-clamp-1">Memuat Kelas...</h1>
+            </div>
+            <div class="text-sm font-semibold text-slate-300 bg-slate-800 px-4 py-1.5 rounded-full shadow-inner">
+                Progress: <span id="progress-text" class="text-blue-400">0%</span>
+            </div>
+        </div>
+    </nav>
+
+    <div id="learn-page" class="flex h-screen pt-16 bg-slate-50 overflow-hidden">
+        
+        <aside class="w-80 flex-shrink-0 bg-white border-r border-slate-200 h-full flex flex-col overflow-y-auto hidden md:flex shadow-sm z-10">
+            <div class="p-6 border-b border-slate-100 bg-slate-50">
+                <h2 class="font-bold text-slate-900 text-lg">Kurikulum Kelas</h2>
+                <p class="text-xs font-medium text-slate-500 mt-1">Selesaikan secara berurutan</p>
+            </div>
+            
+            <div id="sidebar-modules" class="flex-1 overflow-y-auto p-4">
+                <div class="animate-pulse h-12 bg-slate-100 rounded-xl mb-3"></div>
+                <div class="animate-pulse h-12 bg-slate-100 rounded-xl"></div>
+            </div>
+            
+            <div class="p-4 border-t border-slate-100 bg-white sticky bottom-0">
+                <button id="btn-final-exam" class="w-full flex items-center justify-between px-4 py-3 bg-slate-100 text-slate-400 border border-slate-200 rounded-xl font-bold transition-all cursor-not-allowed">
+                    <span><i class="fas fa-lock mr-2"></i> Ujian Akhir Terkunci</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 h-full overflow-y-auto relative bg-slate-50 p-4 md:p-8">
+            <div class="max-w-4xl mx-auto">
+                
+                <div id="view-fallback" class="hidden flex-col items-center justify-center h-[80vh] text-center">
+                    <div class="w-24 h-24 bg-slate-200 text-slate-400 rounded-full flex items-center justify-center text-4xl mb-6 shadow-inner">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Ups, Belum Ada Materi</h2>
+                    <p class="text-slate-500">Instruktur belum menambahkan konten PDF untuk bagian ini.</p>
+                </div>
+
+                <div id="view-pdf" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col h-[85vh]">
+                    <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                        <h2 id="pdf-title" class="font-bold text-slate-800">...</h2>
+                        <span class="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-1 rounded">Materi Belajar</span>
+                    </div>
+                    <div class="flex-1 bg-slate-200 w-full relative">
+                        <iframe id="pdf-iframe" src="" class="w-full h-full border-0 absolute inset-0"></iframe>
+                    </div>
+                    <div class="p-4 border-t border-slate-100 bg-white flex justify-end">
+                        <div id="pdf-action-container"></div>
+                    </div>
+                </div>
+
+                <div id="view-quiz" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-8">
+                    <div class="text-center mb-8 pb-6 border-b border-slate-100">
+                        <div class="inline-flex w-16 h-16 bg-blue-50 text-blue-600 rounded-full items-center justify-center text-3xl mb-4 border border-blue-100 shadow-sm">
+                            <i id="quiz-icon" class="fas fa-tasks"></i>
+                        </div>
+                        <h2 id="quiz-title" class="text-2xl font-black text-slate-900">...</h2>
+                        <p id="quiz-desc" class="text-slate-500 mt-2 font-medium">Pilih jawaban yang paling tepat.</p>
+                    </div>
+
+                    <form id="quiz-form" class="space-y-8">
+                        <div id="quiz-questions-container" class="space-y-8"></div>
+                        <div class="pt-6 border-t border-slate-100 flex justify-end">
+                            <button type="submit" id="btn-submit-quiz" class="bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-[0_4px_0_0_#1e40af] hover:-translate-y-0.5 active:translate-y-[4px] active:shadow-none transition-all">
+                                Kumpulkan Jawaban
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="view-success" class="hidden flex flex-col items-center justify-center h-[80vh] text-center">
+                    <div class="w-32 h-32 bg-yellow-50 text-yellow-500 rounded-full flex items-center justify-center text-6xl shadow-inner border-[4px] border-white ring-4 ring-yellow-100 mb-6">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h2 class="text-4xl font-black text-slate-900 mb-4 tracking-tight">Selamat! Kamu Lulus!</h2>
+                    <p class="text-lg text-slate-600 mb-8 max-w-md">Kerja kerasmu terbayar. Kamu telah menguasai materi kursus ini dengan sangat baik.</p>
+                    <a id="btn-download-cert" href="#" target="_blank" class="bg-slate-900 text-white font-bold px-8 py-4 rounded-xl shadow-[0_4px_0_0_#0f172a] hover:-translate-y-0.5 active:translate-y-[4px] active:shadow-none transition-all flex items-center gap-3">
+                        <i class="fas fa-download"></i> Unduh Sertifikat PDF
+                    </a>
+                    <a href="/profile" class="mt-6 font-bold text-blue-600 hover:text-blue-700 hover:underline">Kembali ke Beranda Profil</a>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</Layout>
