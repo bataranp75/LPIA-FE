@@ -1,10 +1,13 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 html {
   scroll-behavior: smooth;
 }
 
-@theme {
+
+:root {
   --color-primary: #0F3B66;
   --color-primary-dark: #0A2540;
   --color-primary-light: #3E6CA0;
@@ -22,9 +25,7 @@ html {
   --color-blue-700: #0A2540;
   --color-blue-800: #061E33;
   --color-blue-900: #041524;
-}
 
-:root {
   --font-display: 'Merriweather', 'Georgia', serif;
   --font-body: 'DM Sans', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --color-ink: #0A2540;
@@ -33,6 +34,11 @@ html {
   --color-hairline: #E5E9F0;
   --color-surface-soft: #EFF6FF;
   --color-surface-base: #F8FAFC;
+}
+
+/* Custom CSS dan @apply tetap di bawah sini */
+.btn-school {
+  @apply bg-gradient-to-br from-[#0F3B66] to-[#0A2540] hover:from-[#0A2540] hover:to-[#061E33] text-white px-6 py-2;
 }
 
 body {
