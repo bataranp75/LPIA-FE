@@ -1,8 +1,8 @@
+@import "tailwindcss";
+
 html {
   scroll-behavior: smooth;
 }
-
-@import "tailwindcss";
 
 @theme {
   --color-primary: #0F3B66;
