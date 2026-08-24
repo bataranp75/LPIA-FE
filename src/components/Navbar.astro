@@ -1,32 +1,62 @@
-<nav class="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-6xl bg-white/90 backdrop-blur-md shadow-sm border border-gray-200 rounded-full z-30 transition-all">
-    <div class="px-6 py-3 flex justify-between items-center">
-        <a href="/" class="text-2xl font-bold text-blue-700 tracking-tight">
-            LPIA<span class="text-blue-500">.</span>
-        </a>
-        
-        <div class="flex items-center gap-8">
-            <div class="hidden md:flex gap-6 font-medium text-gray-600 text-sm">
-                <a data-nav-link data-target="kursus" class="hover:text-blue-600 transition-colors">Kursus</a>
-                <a data-nav-link data-target="cara-daftar" class="hover:text-blue-600 transition-colors">Cara Daftar</a>
-                <a data-nav-link data-target="bantuan" class="hover:text-blue-600 transition-colors">Bantuan</a>
-            </div>
-            
-            <div id="auth-container">
-                </div>
-        </div>
+---
+const { overHero = false } = Astro.props;
+---
+
+<nav id="main-navbar" data-over-hero={overHero ? "true" : "false"} class="fixed inset-x-0 top-0 z-[100] border-b border-slate-200 bg-white/95 backdrop-blur transition-all duration-300 {overHero ? 'nav-hero' : ''}">
+  <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-6">
+    <a href="/" class="nav-brand text-xl font-semibold tracking-[-0.04em] text-[#0A2540]">LPIA<span class="text-[#E25822]">.</span></a>
+
+    <div class="nav-link hidden items-center gap-6 text-sm font-medium text-[#4A4E57] md:flex">
+      <a href="/#kursus" data-nav-link data-target="kursus" class="nav-link-item">Kursus</a>
+      <a href="/#recommendation-section" data-nav-link data-target="recommendation-section" class="nav-link-item">Rekomendasi</a>
+      <a href="/#cara-daftar" data-nav-link data-target="cara-daftar" class="nav-link-item">Cara Daftar</a>
+      <a href="/#bantuan" data-nav-link data-target="bantuan" class="nav-link-item">Bantuan</a>
     </div>
+
+    <div class="flex items-center gap-2">
+      <div id="auth-container"></div>
+      <button id="mobile-nav-toggle" type="button" class="nav-toggle inline-flex h-11 w-11 items-center justify-center rounded-full border border-blue-100 text-[#0A2540] md:hidden" aria-label="Buka navigasi" aria-expanded="false" aria-controls="mobile-nav-menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </div>
+  </div>
+
+  <div id="mobile-nav-menu" class="nav-mobile-menu hidden border-t border-blue-100 bg-white px-4 py-3 md:hidden">
+    <div class="mx-auto flex max-w-7xl flex-col text-sm font-medium text-[#4A4E57]">
+      <a href="/#kursus" data-nav-link data-target="kursus" class="rounded-lg px-3 py-3 hover:bg-[#EFF6FF] hover:text-[#0F3B66]">Kursus</a>
+      <a href="/#recommendation-section" data-nav-link data-target="recommendation-section" class="rounded-lg px-3 py-3 hover:bg-[#EFF6FF] hover:text-[#0F3B66]">Rekomendasi</a>
+      <a href="/#cara-daftar" data-nav-link data-target="cara-daftar" class="rounded-lg px-3 py-3 hover:bg-[#EFF6FF] hover:text-[#0F3B66]">Cara Daftar</a>
+      <a href="/#bantuan" data-nav-link data-target="bantuan" class="rounded-lg px-3 py-3 hover:bg-[#EFF6FF] hover:text-[#0F3B66]">Bantuan</a>
+    </div>
+  </div>
 </nav>
 
 <script>
-    const isHome = window.location.pathname === "/";
-  
-    document.querySelectorAll("[data-nav-link]").forEach(link => {
-      const target = link.getAttribute("data-target");
-  
-      if (isHome) {
-        link.setAttribute("href", `#${target}`);
-      } else {
-        link.setAttribute("href", `/#${target}`);
-      }
-    });
-  </script>
+  const navbar = document.getElementById("main-navbar");
+  const overHero = navbar?.dataset.overHero === "true";
+
+  const updateNav = () => {
+    if (!navbar) return;
+    if (!overHero) {
+      navbar.classList.add("nav-solid");
+      return;
+    }
+    if (window.scrollY > 60) navbar.classList.add("nav-solid");
+    else navbar.classList.remove("nav-solid");
+  };
+
+  window.addEventListener("scroll", updateNav, { passive: true });
+  updateNav();
+
+  document.addEventListener("click", (e) => {
+    const link = e.target.closest("[data-nav-link]");
+    if (!link) return;
+    const targetId = link.getAttribute("data-target");
+    const target = targetId && document.getElementById(targetId);
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      document.getElementById("mobile-nav-menu")?.classList.add("hidden");
+    }
+  });
+</script>

@@ -10,6 +10,7 @@ export const AuthDOM = {
         this.submitBtn = document.getElementById('submit-btn');
         this.tabUser = document.getElementById('tab-user');
         this.tabStaff = document.getElementById('tab-staff');
+        this.authToggleContainer = document.getElementById('auth-toggle-container');
 
         this.isLogin = true;
         this.loginType = 'user';
@@ -20,18 +21,6 @@ export const AuthDOM = {
     },
 
     addEventListeners() {
-        document.addEventListener('click', (e) => {
-            const toggleBtn = e.target.closest('.toggle-auth');
-            if (!toggleBtn) return;
-
-            e.preventDefault();
-
-            if (this.loginType === 'staff') return;
-
-            this.isLogin = !this.isLogin;
-            this.updateUI();
-        });
-
         this.tabUser?.addEventListener('click', () => {
             this.loginType = 'user';
             this.isLogin = true;
@@ -44,12 +33,22 @@ export const AuthDOM = {
             this.updateUI();
         });
 
+        // Event listener delegasi untuk toggle auth karena container innerHTML berubah
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toggle-auth')) {
+                e.preventDefault();
+                if (this.loginType === 'staff') return; // Jangan biarkan toggle untuk staff
+                this.isLogin = !this.isLogin;
+                this.updateUI();
+            }
+        });
+
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
     },
 
     updateUI() {
         const nameField = document.getElementById('name-field');
-        const toggleContainer = document.querySelector('.toggle-auth')?.parentElement;
+        const toggleContainer = this.authToggleContainer;
 
         // Reset tab style
         this.tabUser?.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
@@ -150,7 +149,12 @@ export const AuthDOM = {
                         icon: 'success',
                         confirmButtonColor: '#2563eb'
                     }).then(() => {
-                        window.location.href = response.redirect_url || '/';
+                        const redirectUrl = response.user?.role === 'guru'
+                            ? '/guru/dashboard?mode=modul'
+                            : this.loginType === 'user'
+                                ? '/'
+                                : response.redirect_url || '/';
+                        window.location.href = redirectUrl;
                     });
                 } else {
                     Swal.fire({

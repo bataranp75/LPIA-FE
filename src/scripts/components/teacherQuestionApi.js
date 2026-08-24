@@ -1,4 +1,14 @@
+import { CONFIG } from '../config/index.js';
+
 const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+
+function authHeaders(extra = {}) {
+    const token = localStorage.getItem(CONFIG.STORAGE_KEY);
+    return {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...extra
+    };
+}
 
 export const TeacherQuestionApi = {
     getTemplateUrl(teacherId) {
@@ -9,7 +19,14 @@ export const TeacherQuestionApi = {
         const formData = new FormData();
 
         Object.entries(payload).forEach(([key, value]) => {
-            formData.append(key, value ?? '');
+            // Jangan kirim string kosong untuk field ID (kolom UUID di database
+            // akan menolak "" dengan error "invalid input syntax for type uuid").
+            if (value === null || value === undefined || value === '') {
+                if (key.endsWith('_id')) return;
+                formData.append(key, '');
+                return;
+            }
+            formData.append(key, value);
         });
 
         if (imageFile && imageFile.size) {
@@ -18,6 +35,7 @@ export const TeacherQuestionApi = {
 
         const res = await fetch(`${API_URL}/teacher/${teacherId}/questions/manual`, {
             method: 'POST',
+            headers: authHeaders(),
             body: formData
         });
 
@@ -60,6 +78,7 @@ export const TeacherQuestionApi = {
 
         const res = await fetch(`${API_URL}/teacher/${teacherId}/questions/sync`, {
             method: 'POST',
+            headers: authHeaders(),
             body: formData
         });
 
@@ -80,6 +99,7 @@ export const TeacherQuestionApi = {
 
         const res = await fetch(`${API_URL}/teacher/${teacherId}/questions/import`, {
             method: 'POST',
+            headers: authHeaders(),
             body: formData
         });
 
@@ -95,9 +115,9 @@ export const TeacherQuestionApi = {
     async deleteQuestions({ teacherId, moduleId, questionIds = [] }) {
         const res = await fetch(`${API_URL}/teacher/${teacherId}/questions`, {
             method: 'DELETE',
-            headers: {
+            headers: authHeaders({
                 'Content-Type': 'application/json'
-            },
+            }),
             body: JSON.stringify({
                 module_id: moduleId,
                 question_ids: questionIds

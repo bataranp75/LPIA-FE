@@ -3,6 +3,8 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 ---
 
 <AdminLayout title="Dashboard">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <section id="admin-dashboard-page" class="space-y-10">
         <!-- Header -->
         <header class="flex items-start gap-4">
@@ -144,7 +146,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                 <div class="h-px flex-1 bg-slate-200"></div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-5">
                         <div>
@@ -182,31 +184,82 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                 <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-5">
                         <div>
-                            <h2 class="text-xl font-black">Catatan Admin</h2>
-                            <p class="text-sm text-slate-500 mt-1">Prioritas pengelolaan sistem.</p>
+                            <h2 class="text-xl font-black">Ringkasan Kursus</h2>
+                            <p class="text-sm text-slate-500 mt-1">Ikhtisar katalog kursus yang aktif.</p>
                         </div>
-                        <div class="w-12 h-12 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center">
-                            <i class="fas fa-clipboard-check"></i>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                            <i class="fas fa-book-open"></i>
                         </div>
                     </div>
 
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <i class="fas fa-circle-check text-emerald-600"></i>
-                            <span class="text-sm font-bold text-slate-700">Pastikan role guru dan admin sudah sesuai.</span>
+                    <div class="grid grid-cols-1 gap-4">
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Total Kursus Aktif</p>
+                            <p id="course-summary-total" class="mt-2 text-2xl font-black text-slate-900">0</p>
                         </div>
 
-                        <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <i class="fas fa-circle-check text-emerald-600"></i>
-                            <span class="text-sm font-bold text-slate-700">Cek akses CRUD guru sebelum materi dipublikasikan.</span>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Kategori Kursus Terpopuler</p>
+                            <p id="course-summary-top-category" class="mt-2 text-lg font-black text-slate-900">-</p>
                         </div>
 
-                        <div class="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-                            <i class="fas fa-circle-check text-emerald-600"></i>
-                            <span class="text-sm font-bold text-slate-700">Pantau transaksi pending secara berkala.</span>
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Distribusi Level Kursus</p>
+                            <div id="course-summary-levels" class="mt-3 space-y-2"></div>
+                        </div>
+
+                        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                            <p class="text-xs font-bold uppercase tracking-wide text-slate-500">Kursus dengan Peminat Terbanyak</p>
+                            <p id="course-summary-top-course" class="mt-2 text-sm font-bold text-slate-900">-</p>
                         </div>
                     </div>
                 </div>
+
+                <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 col-span-1 lg:col-span-2 xl:col-span-1">
+    <div class="flex items-center justify-between mb-5">
+
+        <div>
+            <h3 class="text-lg font-bold text-slate-800">
+                Penjualan Bulanan
+            </h3>
+
+            <p class="text-sm text-slate-500">
+                Total transaksi berhasil berdasarkan bulan
+            </p>
+        </div>
+
+        <select
+            id="sales-chart-filter"
+            class="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+        >
+            <option value="7">7 Hari</option>
+            <option value="30" selected>30 Hari</option>
+            <option value="365">12 Bulan</option>
+        </select>
+
+    </div>
+
+    <div id="sales-chart-loading" class="h-[280px] flex items-center justify-center">
+        <i class="fa-solid fa-spinner fa-spin text-3xl text-blue-500"></i>
+    </div>
+
+    <div class="relative h-[240px] w-full">
+        <canvas
+            id="sales-chart"
+            class="hidden"
+        ></canvas>
+    </div>
+
+    <div
+        id="sales-chart-empty"
+        class="hidden h-[280px] flex flex-col justify-center items-center text-slate-400"
+    >
+        <i class="fa-solid fa-chart-column text-5xl mb-3"></i>
+
+        <p>Belum ada data penjualan.</p>
+    </div>
+
+</div>
             </div>
         </section>
     </section>

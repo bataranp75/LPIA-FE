@@ -68,6 +68,10 @@ export const TeacherExamWorkspace = {
                                 <i class="fas fa-eye mr-2"></i>Lihat
                             </button>
 
+                            <button id="simulate-exam-btn" class="px-4 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm">
+                                <i class="fas fa-user-graduate mr-2"></i>Preview Sebagai Murid
+                            </button>
+
                             ${
                                 permissions?.can_update_material
                                     ? `
@@ -103,12 +107,14 @@ export const TeacherExamWorkspace = {
         onView,
         onEdit,
         onDelete,
-        onSettingTimer
+        onSettingTimer,
+        onSimulate
     }) {
         document.getElementById('add-exam-question-btn')?.addEventListener('click', onAdd);
         document.getElementById('view-exam-question-btn')?.addEventListener('click', onView);
         document.getElementById('edit-exam-question-btn')?.addEventListener('click', onEdit);
         document.getElementById('delete-exam-question-btn')?.addEventListener('click', onDelete);
         document.getElementById('setting-exam-timer-btn')?.addEventListener('click', onSettingTimer);
+        document.getElementById('simulate-exam-btn')?.addEventListener('click', onSimulate);
     }
 };

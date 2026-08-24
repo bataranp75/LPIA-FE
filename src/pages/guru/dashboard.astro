@@ -1,14 +1,59 @@
 ---
 import GuruLayout from '../../layouts/GuruLayout.astro';
+
+const copy = {
+    modul: {
+        title: 'Kelola Modul',
+        desc: 'Pilih kursus yang Anda ampu, lalu tambah, edit, hapus, dan atur urutan modul.',
+        badge: 'Modul Course',
+        icon: 'fa-folder-open',
+        accent: 'text-amber-600 bg-amber-50'
+    },
+    materi: {
+        title: 'Kelola Materi',
+        desc: 'Pilih kursus yang Anda ampu, lalu upload, edit, hapus, dan atur urutan materi PDF.',
+        badge: 'Materi Pembelajaran',
+        icon: 'fa-file-pdf',
+        accent: 'text-blue-600 bg-blue-50'
+    },
+    soal: {
+        title: 'Kelola Soal',
+        desc: 'Pilih kursus yang Anda ampu, lalu kelola soal latihan berdasarkan modul.',
+        badge: 'Bank Soal',
+        icon: 'fa-circle-question',
+        accent: 'text-purple-600 bg-purple-50'
+    },
+    ujian: {
+        title: 'Kelola Ujian',
+        desc: 'Pilih kursus yang Anda ampu, lalu kelola soal ujian course dan setting timer.',
+        badge: 'Manajemen Ujian',
+        icon: 'fa-file-circle-check',
+        accent: 'text-cyan-600 bg-cyan-50'
+    }
+};
+
+const requestedMode = Astro.url.searchParams.get('mode') || 'modul';
+const activeMode = requestedMode in copy ? requestedMode as keyof typeof copy : 'modul';
+const pageCopy = copy[activeMode];
 ---
 
-<GuruLayout title="Dashboard Guru">
-    <section id="teacher-materials-page">
-        <div class="mb-8">
-            <p class="text-sm font-bold text-blue-600 mb-2">Dashboard Guru</p>
-            <h1 class="text-3xl font-black text-slate-900">Kelola Materi</h1>
-            <p class="text-slate-400 mt-2">Pilih kursus yang Anda ampu, lalu kelola modul dan materi di dalamnya.</p>
+<GuruLayout title={pageCopy.title}>
+    <section id="teacher-materials-page" data-feature-mode={activeMode}>
+        <div class="mb-8 flex items-start gap-4">
+            <div class={`hidden sm:flex w-14 h-14 rounded-2xl items-center justify-center text-xl shrink-0 ${pageCopy.accent}`}>
+                <i class={`fas ${pageCopy.icon}`}></i>
+            </div>
+
+            <div class="min-w-0">
+                <p class="text-sm font-bold text-blue-600 mb-1">Dashboard Guru / {pageCopy.title}</p>
+                <h1 class="text-3xl font-black text-slate-900">{pageCopy.title}</h1>
+                <p class="text-slate-400 mt-2">{pageCopy.desc}</p>
+            </div>
         </div>
+
+        <div id="teacher-dashboard-stats" class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4 mb-6"></div>
+
+        <div id="teacher-dashboard-toolbar" class="mb-6"></div>
 
         <div id="teacher-courses-grid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5"></div>
     </section>

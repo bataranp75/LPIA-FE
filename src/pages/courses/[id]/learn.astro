@@ -72,15 +72,29 @@ import Layout from '../../../layouts/Layout.astro';
                         <p id="quiz-desc" class="text-slate-500 mt-2 font-medium">Pilih jawaban yang paling tepat.</p>
                     </div>
 
-                    <form id="quiz-form" class="space-y-8">
+                    <div id="quiz-intro-container"></div>
+
+                    <form id="quiz-form" class="space-y-8 hidden">
                         <div id="quiz-questions-container" class="space-y-8"></div>
                         <div class="pt-6 border-t border-slate-100 flex justify-end">
                             <button type="submit" id="btn-submit-quiz" class="bg-blue-600 text-white font-bold px-8 py-3.5 rounded-xl shadow-[0_4px_0_0_#1e40af] hover:-translate-y-0.5 active:translate-y-[4px] active:shadow-none transition-all">
-                                Kumpulkan Jawaban
+                                Kumpulkan Jawaban Latihan
                             </button>
                         </div>
                     </form>
                 </div>
+
+                <!-- Hasil latihan (Task 2) -->
+                <div id="view-quiz-result" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-8"></div>
+
+                <!-- Persiapan ujian (Task 3) -->
+                <div id="view-exam-prep" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-8"></div>
+
+                <!-- Ujian satu-per-satu (Task 4) -->
+                <div id="view-exam" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col" style="min-height:85vh"></div>
+
+                <!-- Hasil ujian (Task 6) -->
+                <div id="view-exam-result" class="hidden bg-white rounded-2xl border border-slate-200 shadow-sm p-8"></div>
 
                 <div id="view-success" class="hidden flex flex-col items-center justify-center h-[80vh] text-center">
                     <div class="w-32 h-32 bg-yellow-50 text-yellow-500 rounded-full flex items-center justify-center text-6xl shadow-inner border-[4px] border-white ring-4 ring-yellow-100 mb-6">

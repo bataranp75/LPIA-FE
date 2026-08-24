@@ -1,0 +1,120 @@
+---
+import GuruLayout from '../../layouts/GuruLayout.astro';
+---
+
+<GuruLayout title="Profil Saya | LPIA Guru">
+    <div id="guru-profile-page" class="min-h-screen pt-4 pb-20">
+        <div class="max-w-4xl mx-auto">
+            
+            <div id="profile-banner" class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-3xl p-10 mb-8 text-white shadow-lg relative overflow-hidden flex items-center gap-6 transition-colors duration-500">
+                <div id="banner-bg-icon" class="absolute -right-10 -top-10 text-[15rem] opacity-20 rotate-12 pointer-events-none transition-all duration-500">
+                    <i class="fas fa-chalkboard-user"></i>
+                </div>
+                
+                <div
+                id="user-display-avatar"
+                class="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center overflow-hidden flex-shrink-0"
+                >
+                <img id="avatarPreviewDisplay" src="/default-avatar.png" alt="Foto Profil" class="w-full h-full object-cover">
+                </div>
+                <div class="z-10">
+                    <h1 id="user-display-name" class="text-3xl md:text-4xl font-black tracking-tight mb-1">Memuat...</h1>
+                    <div id="user-display-level-badge" class="inline-flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest backdrop-blur-sm">
+                        <i class="fas fa-chalkboard"></i> <span id="user-level-text">Pengajar</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    <i class="fas fa-user-edit text-blue-600"></i> Edit Informasi Profil
+                </h2>
+                <form id="form-update-guru-profile" class="space-y-5 max-w-md">
+                    <div class="profile-photo-section space-y-3">
+                        <label class="block text-sm font-bold text-slate-700">Foto Profil</label>
+
+                        <div class="profile-photo-preview w-24 h-24 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden">
+                            <img id="avatarPreview" src="/default-avatar.png" alt="Foto Profil" class="w-full h-full object-cover">
+                        </div>
+
+                        <div class="mt-3">
+                            <label
+                                for="avatarInput"
+                                class="inline-flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-300 bg-white text-slate-700 text-sm font-bold cursor-pointer hover:bg-blue-50 hover:border-blue-400 hover:text-blue-700 transition-all shadow-sm"
+                            >
+                                <i class="fas fa-upload text-blue-600"></i>
+                                Pilih Foto Profil
+                            </label>
+
+                            <span id="avatarFileName" class="ml-3 text-sm text-slate-500">
+                                Belum ada file dipilih
+                            </span>
+
+                            <input
+                                type="file"
+                                id="avatarInput"
+                                accept="image/jpeg,image/png,image/jpg"
+                                class="hidden"
+                            />
+
+                            <p class="text-xs text-slate-500 mt-2">
+                                Format: JPG/PNG, maksimal 5MB.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Nama Lengkap</label>
+                        <input type="text" id="input-full-name" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" placeholder="Nama Anda">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Email</label>
+                        <input type="email" id="input-email" disabled class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-400 cursor-not-allowed">
+                        <p class="text-xs text-slate-400 mt-2 leading-relaxed">
+                            <i class="fas fa-lock mr-1"></i>
+                            Email tidak dapat diubah karena menjadi identitas login akun
+                            (terhubung ke sistem autentikasi Supabase). Jika perlu ganti email,
+                            hubungi admin LPIA.
+                        </p>
+                    </div>
+
+                    <button type="submit" id="btn-save-guru-profile" class="bg-blue-600 text-white font-bold px-8 py-3 rounded-xl shadow-[0_4px_0_0_#1e40af] hover:-translate-y-0.5 active:translate-y-[4px] active:shadow-none transition-all">
+                        Simpan Perubahan
+                    </button>
+                </form>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm mt-8">
+                <h2 class="text-xl font-bold mb-2 flex items-center gap-2">
+                    <i class="fas fa-key text-blue-600"></i> Ubah Password
+                </h2>
+                <p class="text-sm text-slate-400 mb-6">
+                    Gunakan password minimal 8 karakter. Setelah diganti, gunakan password baru saat login berikutnya.
+                </p>
+
+                <form id="form-change-password" class="space-y-5 max-w-md">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Password Lama</label>
+                        <input type="password" id="input-current-password" required autocomplete="current-password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" placeholder="Password saat ini">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Password Baru</label>
+                        <input type="password" id="input-new-password" required minlength="8" autocomplete="new-password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" placeholder="Minimal 8 karakter">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-2">Konfirmasi Password Baru</label>
+                        <input type="password" id="input-confirm-password" required minlength="8" autocomplete="new-password" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all" placeholder="Ulangi password baru">
+                    </div>
+
+                    <button type="submit" id="btn-change-password" class="bg-slate-800 text-white font-bold px-8 py-3 rounded-xl shadow-[0_4px_0_0_#0f172a] hover:-translate-y-0.5 active:translate-y-[4px] active:shadow-none transition-all">
+                        Ubah Password
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</GuruLayout>

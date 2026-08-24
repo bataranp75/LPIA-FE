@@ -4,14 +4,25 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
 <AdminLayout title="Manajemen Transaksi">
     <section id="admin-transactions-page">
-        <div class="flex items-start gap-4 mb-8">
-            <button id="admin-sidebar-toggle" class="lg:hidden w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700">
-                <i class="fas fa-bars"></i>
-            </button>
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            <div class="flex items-start gap-4">
+                <button id="admin-sidebar-toggle" class="lg:hidden w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700">
+                    <i class="fas fa-bars"></i>
+                </button>
 
-            <div>
-                <h1 class="text-3xl font-black">Manajemen Transaksi</h1>
-                <p class="text-slate-500 mt-1">Log seluruh transaksi siswa pada LMS.</p>
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900">Manajemen Transaksi</h1>
+                    <p class="text-slate-500 mt-2">Log seluruh transaksi siswa pada LMS.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <button id="btn-print-transactions" class="px-4 py-3 rounded-2xl bg-slate-900 text-white font-black text-sm hover:bg-slate-800">
+                    <i class="fas fa-print mr-2"></i>Cetak PDF
+                </button>
+                <button id="btn-export-word-transactions" class="px-4 py-3 rounded-2xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700">
+                    <i class="fas fa-file-word mr-2"></i>Export Word
+                </button>
             </div>
         </div>
 

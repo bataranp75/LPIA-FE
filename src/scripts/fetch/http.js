@@ -5,8 +5,10 @@ export const HTTP = {
   activeBaseUrl: null,
 
   async request(endpoint, options = {}) {
+    const isFormData = options.body instanceof FormData;
+
     const headers = {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...options.headers,
     };
 
@@ -77,6 +79,16 @@ export const HTTP = {
     return this.request(endpoint, {
       method: "PATCH",
       body: JSON.stringify(data),
+    });
+  },
+
+  form(endpoint, formData, method = "POST") {
+    const token = localStorage.getItem(CONFIG.STORAGE_KEY);
+
+    return this.request(endpoint, {
+      method,
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
     });
   },
 

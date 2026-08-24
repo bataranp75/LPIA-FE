@@ -1,8 +1,20 @@
+import { CONFIG } from '../config/index.js';
+
 const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+
+function authHeaders(extra = {}) {
+    const token = localStorage.getItem(CONFIG.STORAGE_KEY);
+    return {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...extra
+    };
+}
 
 export const TeacherExamApi = {
     async getCourseExam({ teacherId, courseId }) {
-        const res = await fetch(`${API_URL}/teacher/${teacherId}/courses/${courseId}/exam`);
+        const res = await fetch(`${API_URL}/teacher/${teacherId}/courses/${courseId}/exam`, {
+            headers: authHeaders()
+        });
         const json = await res.json();
 
         if (!res.ok || json.status === 'error') {
@@ -41,6 +53,7 @@ export const TeacherExamApi = {
 
         const res = await fetch(`${API_URL}/teacher/${teacherId}/exam/sync`, {
             method: 'POST',
+            headers: authHeaders(),
             body: formData
         });
 
@@ -56,7 +69,7 @@ export const TeacherExamApi = {
     async deleteExamQuestions({ teacherId, courseId, questionIds = [] }) {
         const res = await fetch(`${API_URL}/teacher/${teacherId}/exam/questions`, {
             method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
                 course_id: courseId,
                 question_ids: questionIds
@@ -75,7 +88,7 @@ export const TeacherExamApi = {
     async updateExamTimer({ teacherId, courseId, durationMinutes }) {
         const res = await fetch(`${API_URL}/teacher/${teacherId}/exam/setting`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
                 course_id: courseId,
                 duration_minutes: durationMinutes
@@ -103,6 +116,7 @@ export const TeacherExamApi = {
 
         const res = await fetch(`${API_URL}/teacher/${teacherId}/exam/import`, {
             method: 'POST',
+            headers: authHeaders(),
             body: formData
         });
 

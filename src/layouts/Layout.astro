@@ -7,9 +7,10 @@ interface Props {
 	title: string;
 	showNavbar?: boolean;
 	showFooter?: boolean;
+	navOverHero?: boolean;
 }
 
-const { title, showNavbar = true, showFooter = true } = Astro.props;
+const { title, showNavbar = true, showFooter = true, navOverHero = false } = Astro.props;
 ---
 
 <!doctype html>
@@ -22,13 +23,13 @@ const { title, showNavbar = true, showFooter = true } = Astro.props;
 
 		<link rel="preconnect" href="https://fonts.googleapis.com">
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Itim&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 	</head>
 
-	<body class="bg-dots min-h-screen flex flex-col">
-		{showNavbar && <Navbar />}
+	<body class="min-h-screen flex flex-col bg-gradient-to-b from-[#F8FAFC] via-[#EFF6FF]/60 to-[#F8FAFC]">
+		{showNavbar && <Navbar overHero={navOverHero} />}
 
 		<main class="flex-grow">
 			<slot />

@@ -115,11 +115,9 @@ export const CourseDetailDOM = {
       document.getElementById("card-thumbnail-skeleton").style.display = "none";
     };
     document.getElementById("card-price").innerText = priceFmt;
-    const sideCategory = document.getElementById("side-category");
 
-    if(sideCategory){
-        sideCategory.innerText = c.category || "-";
-    }
+    const sideCategory = document.getElementById("side-category");
+    if (sideCategory) sideCategory.innerText = c.category || "-";
 
     const sideLevel = document.getElementById("side-level");
     if (sideLevel) sideLevel.innerText = c.level || "-";
@@ -177,19 +175,19 @@ if(tagContainer){
         ? [
             {
               icon: "fa-location-dot",
-              text: "Akses pelajaran secara offline",
+              text: "Belajar langsung di lokasi kelas",
             },
             {
               icon: "fa-chalkboard-user",
-              text: "Belajar secara langsung",
+              text: "Interaksi langsung dengan pengajar",
             },
             {
               icon: "fa-book",
-              text: "Modul buku",
+              text: "Modul pembelajaran",
             },
             {
               icon: "fa-certificate",
-              text: "Sertifikat Kelulusan Resmi",
+              text: "Sertifikat",
             },
           ]
         : [
@@ -203,7 +201,7 @@ if(tagContainer){
             },
             {
               icon: "fa-certificate",
-              text: "Sertifikat Kelulusan Resmi",
+              text: "Sertifikat",
             },
           ];
 
@@ -224,74 +222,43 @@ if(tagContainer){
     const moduleContainer = document.getElementById("module-list");
 
     if (!c.modules || c.modules.length === 0) {
-      moduleContainer.innerHTML = Fallback.emptyState(
-        "Belum ada modul untuk kursus ini.",
-        "fa-folder-open",
-      );
+      moduleContainer.innerHTML = `
+        <div class="flex flex-col items-center justify-center py-8 text-center">
+          <div class="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center text-xl mb-3">
+            <i class="fas fa-book-open"></i>
+          </div>
+          <p class="text-sm font-semibold text-slate-500">Belum ada modul tersedia</p>
+        </div>
+      `;
       return;
     }
 
-    const sortedModules = c.modules.sort((a, b) => a.order_index - b.order_index);
+    const sortedModules = c.modules.sort(
+      (a, b) => a.order_index - b.order_index,
+    );
 
-    let modulesHTML = sortedModules
-      .map((m, i) => {
-        const materialCount = m.materials?.length || 0;
-        const quizQuestions = (m.questions || []).filter(q => q.is_exam === false);
-        const quizCount = quizQuestions.length;
-
-        return `
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div class="flex items-center gap-4">
-                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 font-black text-blue-600 shadow-sm">
-                        ${String(i + 1).padStart(2, '0')}
-                    </div>
-                    <div>
-                        <h4 class="text-lg font-black text-slate-900">${m.title}</h4>
-                    </div>
+    moduleContainer.innerHTML = sortedModules
+      .map(
+        (m, i) => `
+            <div class="flex items-center p-4 rounded-xl border border-slate-200 transition-colors group ${isOwned ? "bg-white hover:border-blue-400 cursor-pointer shadow-sm" : "bg-slate-50 hover:bg-white hover:border-blue-300"}" 
+                 ${isOwned ? `onclick="window.location.href='/courses/${c.id}/learn'"` : ""}>
+                 
+                <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold mr-4 shadow-sm transition-colors ${isOwned ? "bg-blue-50 border border-blue-200 text-blue-600" : "bg-white border border-slate-200 text-slate-400 group-hover:text-blue-500 group-hover:border-blue-300"}">
+                    ${i + 1}
                 </div>
                 
-                <div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
-                        📄 <span>${materialCount} Materi</span>
-                    </div>
-                    <div class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700">
-                        ❓ <span>${quizCount} Latihan</span>
-                    </div>
+                <div class="flex-grow">
+                    <h4 class="font-bold transition-colors ${isOwned ? "text-slate-900 group-hover:text-blue-700" : "text-slate-800 group-hover:text-blue-600"}">${m.title}</h4>
+                    <p class="text-xs font-semibold text-slate-400 mt-0.5"><i class="far fa-file-pdf mr-1"></i> Materi PDF</p>
+                </div>
+                
+                <div class="transition-colors ${isOwned ? "text-blue-500" : "text-slate-300 group-hover:text-blue-400"}">
+                    <i class="${isOwned ? "fas fa-play-circle text-2xl drop-shadow-sm" : "fas fa-lock"}"></i>
                 </div>
             </div>
-        `;
-      })
+        `,
+      )
       .join("");
-
-    const allQuestions = sortedModules.flatMap(m => m.questions || []);
-    const examQuestions = allQuestions.filter(q => q.is_exam === true);
-    const examCount = examQuestions.length;
-
-    if (examCount > 0) {
-      modulesHTML += `
-        <div class="rounded-xl border-2 border-emerald-200 bg-emerald-50 p-5 shadow-sm">
-          <div class="flex items-center gap-4 mb-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-2xl">
-              📝
-            </div>
-            <div>
-              <h4 class="text-lg font-black text-slate-900">Ujian Akhir Course</h4>
-            </div>
-          </div>
-          
-          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div class="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-700">
-              📝 <span>${examCount} Soal Ujian</span>
-            </div>
-            <div class="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-700">
-              🎯 <span>Nilai Minimum 70</span>
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    moduleContainer.innerHTML = modulesHTML;
   },
 
   async renderCTA() {
@@ -335,32 +302,16 @@ if(tagContainer){
         });
       } else {
         // JIKA BELUM PUNYA: Biarkan tergembok, tampilkan tombol beli
-        const isOffline = String(this.courseData.delivery_type).toLowerCase() === "offline";
-        if (isOffline) {
-          ctaContainer.innerHTML = this.getButtonHTML({
-            text: "Daftar Kelas Offline",
-            variant: "primary",
-            size: "lg",
-            icon: "fas fa-file-signature",
-            dataId: "btn-checkout",
-          });
-          document
-            .getElementById("btn-checkout")
-            .addEventListener("click", () => {
-              window.location.href = `/courses/${this.courseId}/offline-register`;
-            });
-        } else {
-          ctaContainer.innerHTML = this.getButtonHTML({
-            text: isFree ? "Klaim Kelas Sekarang" : "Beli Kelas Sekarang",
-            variant: "primary",
-            size: "lg",
-            icon: isFree ? "fas fa-check-circle" : "fas fa-shopping-cart",
-            dataId: "btn-checkout",
-          });
-          document
-            .getElementById("btn-checkout")
-            .addEventListener("click", () => this.handleCheckout());
-        }
+        ctaContainer.innerHTML = this.getButtonHTML({
+          text: isFree ? "Klaim Kelas Sekarang" : "Beli Kelas Sekarang",
+          variant: "primary",
+          size: "lg",
+          icon: isFree ? "fas fa-check-circle" : "fas fa-shopping-cart",
+          dataId: "btn-checkout",
+        });
+        document
+          .getElementById("btn-checkout")
+          .addEventListener("click", () => this.handleCheckout());
       }
     } catch (error) {
       // handleAuthError...
@@ -416,10 +367,7 @@ if(tagContainer){
               "Menunggu!",
               "Segera selesaikan pembayaranmu.",
               "info",
-            ).then(async () => {
-              await HTTP.get(`/transactions/${result.order_id}/verify`);
-              window.location.href = "/profile";
-            });
+            ).then(() => (window.location.href = "/profile"));
           },
           onError: (result) => {
             Swal.fire("Gagal!", "Terjadi kesalahan pembayaran.", "error");

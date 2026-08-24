@@ -6,10 +6,15 @@ interface Props {
 }
 
 const { title } = Astro.props;
-const pathname = Astro.url.pathname;
+const currentPath = Astro.url.pathname;
+const currentMode = Astro.url.searchParams.get('mode') || 'modul';
 
 const menus = [
-    { href: '/guru/dashboard', label: 'Kelola Materi', icon: 'fa-book-open' },
+    { href: '/guru/dashboard?mode=modul', mode: 'modul', label: 'Kelola Modul', icon: 'fa-folder-open' },
+    { href: '/guru/dashboard?mode=materi', mode: 'materi', label: 'Kelola Materi', icon: 'fa-file-pdf' },
+    { href: '/guru/dashboard?mode=soal', mode: 'soal', label: 'Kelola Soal', icon: 'fa-circle-question' },
+    { href: '/guru/dashboard?mode=ujian', mode: 'ujian', label: 'Kelola Ujian', icon: 'fa-file-circle-check' },
+    { href: '/guru/profile', label: 'Profil Saya', icon: 'fa-user-circle' },
 ];
 ---
 
@@ -29,35 +34,62 @@ const menus = [
 
     <div class="flex min-h-screen">
         <aside id="admin-sidebar" class="fixed lg:sticky top-0 left-0 z-[999] h-screen w-72 bg-white border-r border-slate-200 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 flex flex-col">
-            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-black text-blue-700">LPIA Guru</h1>
-                    <p class="text-xs font-bold text-slate-400 mt-1">Panel Pengajar</p>
+            <div class="p-5 border-b border-slate-100">
+                <div class="flex items-center justify-between mb-4">
+                    <p class="text-2xl font-extrabold tracking-[-0.04em] text-blue-700">LPIA GURU</p>
+
+                    <button id="admin-sidebar-close" class="lg:hidden w-9 h-9 rounded-xl bg-slate-100 text-slate-700">
+                        <i class="fas fa-xmark"></i>
+                    </button>
                 </div>
 
-                <button id="admin-sidebar-close" class="lg:hidden w-10 h-10 rounded-xl bg-slate-100 text-slate-700">
-                    <i class="fas fa-xmark"></i>
-                </button>
+                <a href="/guru/profile" id="guru-profile-card" class="group block rounded-2xl bg-gradient-to-br from-blue-50 to-slate-50 border border-blue-100 p-4 transition-all duration-300 hover:border-blue-300 hover:shadow-md hover:shadow-blue-100">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="relative mb-3">
+                            <div id="guru-avatar-wrap" class="w-16 h-16 rounded-full bg-blue-600 text-white flex items-center justify-center text-xl font-black ring-4 ring-white shadow-md overflow-hidden">
+                                <span id="guru-avatar-initials">G</span>
+                                <img id="guru-avatar-img" src="" alt="Foto profil guru" class="hidden w-full h-full object-cover" />
+                            </div>
+                            <span class="absolute bottom-0.5 right-0.5 w-4 h-4 rounded-full bg-emerald-500 border-2 border-white" title="Online"></span>
+                        </div>
+
+                        <h2 id="guru-profile-name" class="text-base font-black text-slate-900 leading-tight line-clamp-1">Guru</h2>
+                        <p class="text-xs font-bold text-slate-400 mt-0.5">Guru / Pengajar</p>
+
+                        <span class="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 text-[11px] font-black">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            Online
+                        </span>
+                    </div>
+
+                    <div class="mt-3 pt-3 border-t border-blue-100/70 flex items-center justify-center gap-2 text-[11px] font-black text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <span>Lihat Profil</span>
+                        <i class="fas fa-arrow-right text-[10px]"></i>
+                    </div>
+                </a>
             </div>
 
-            <nav class="flex-1 py-6">
-                {menus.map((menu) => (
-                    <a 
+            <nav class="flex-1 py-5 px-3 space-y-1 overflow-y-auto thin-scrollbar">
+                {menus.map((menu) => {
+                    const isActive = menu.mode
+                        ? (menu.mode === currentMode && currentPath === '/guru/dashboard')
+                        : currentPath === menu.href;
+                    return (
+                    <a
                         href={menu.href}
-                        class={`flex items-center gap-3 px-6 py-4 font-bold text-sm transition ${
-                            pathname === menu.href 
-                                ? 'bg-blue-600 text-white border-r-4 border-blue-800' 
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                        }`}
+                        class={`flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 guru-menu-link ${isActive ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent'}`}
+                        data-href={menu.href}
+                        data-mode={menu.mode}
                     >
-                        <i class={`fas ${menu.icon} w-5 text-center`}></i>
+                        <i class={`fas ${menu.icon} w-5 text-center ${isActive ? 'text-blue-600' : ''}`}></i>
                         <span>{menu.label}</span>
                     </a>
-                ))}
+                    );
+                })}
             </nav>
 
             <div class="p-4 border-t border-slate-100">
-                <button id="admin-logout-btn" class="w-full flex items-center gap-3 px-4 py-4 text-red-600 hover:bg-red-50 font-bold text-sm transition">
+                <button id="admin-logout-btn" class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl text-red-600 hover:bg-red-50 font-bold text-sm transition-all duration-200">
                     <i class="fas fa-right-from-bracket w-5 text-center"></i>
                     <span>Logout</span>
                 </button>
@@ -79,6 +111,65 @@ const menus = [
 
     <script>
         import '../scripts/main.js';
+    </script>
+
+    <script>
+        // Profile card sidebar guru — satu sumber data dengan halaman Profil Saya.
+        // Render cepat dari cache, lalu refresh dari server, dan dengarkan
+        // event update agar foto/nama langsung berubah tanpa reload.
+        import { ProfileStore } from '../scripts/utils/profileStore.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const nameEl = document.getElementById('guru-profile-name');
+            if (!nameEl) return;
+
+            const initialsEl = document.getElementById('guru-avatar-initials');
+            const avatarImg = document.getElementById('guru-avatar-img') as HTMLImageElement | null;
+
+            const renderProfile = (userData: Record<string, any>) => {
+                const fullName = userData.full_name || 'Guru';
+                nameEl.textContent = fullName;
+
+                if (initialsEl) {
+                    const initials = fullName
+                        .trim()
+                        .split(/\s+/)
+                        .slice(0, 2)
+                        .map((word: string) => word[0] || '')
+                        .join('')
+                        .toUpperCase() || 'G';
+
+                    initialsEl.textContent = initials;
+                }
+
+                if (!avatarImg) return;
+
+                if (userData.avatar_url) {
+                    avatarImg.src = userData.avatar_url;
+                    avatarImg.classList.remove('hidden');
+                    initialsEl?.classList.add('hidden');
+                } else {
+                    avatarImg.classList.add('hidden');
+                    initialsEl?.classList.remove('hidden');
+                }
+            };
+
+            avatarImg?.addEventListener('error', () => {
+                avatarImg.classList.add('hidden');
+                initialsEl?.classList.remove('hidden');
+            });
+
+            // 1. Render langsung dari cache agar tidak flicker
+            renderProfile(ProfileStore.getCached());
+
+            // 2. Ikuti perubahan dari halaman lain (upload foto, edit nama)
+            ProfileStore.subscribe(renderProfile);
+
+            // 3. Ambil data terbaru dari server (sumber kebenaran)
+            ProfileStore.refresh().catch(() => {
+                // Offline/error: cache tetap tampil, tidak perlu mengganggu user.
+            });
+        });
     </script>
 </body>
 </html>

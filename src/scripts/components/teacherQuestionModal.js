@@ -3,12 +3,35 @@ import { AppToast } from './toast';
 import { TeacherQuestionApi } from './teacherQuestionApi';
 import { AppConfirmModal } from './appConfirmModal';
 import { TeacherExamApi } from '../fetch/teacherExamApi';
+import { parseImportFile, IMPORT_TEMPLATES } from '../utils/questionImportParser.js';
 
 export const TeacherQuestionModal = {
     activeTab: 'manual',
     isSubmitting: false,
     bulkItems: [],
     createQuestions: [],
+
+    // Validasi ID wajib sebelum request dikirim — mencegah error database
+    // "invalid input syntax for type uuid" karena ID kosong.
+    isValidId(value) {
+        return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(value || '').trim());
+    },
+
+    validateContextIds({ moduleId = null, courseId = null, variant = 'question' }) {
+        if (variant === 'exam') {
+            if (!this.isValidId(courseId)) {
+                AppToast.error('Course belum terpilih dengan benar. Tutup modal lalu pilih course lagi.');
+                return false;
+            }
+            return true;
+        }
+
+        if (!this.isValidId(moduleId)) {
+            AppToast.error('Modul belum terpilih dengan benar. Tutup modal lalu pilih modul lagi.');
+            return false;
+        }
+        return true;
+    },
 
     open({ teacherId, moduleId = null, courseId = null, questions = [], variant = 'question', onSuccess }) {
         this.activeTab = 'manual';
@@ -21,8 +44,8 @@ export const TeacherQuestionModal = {
             zIndex: 11000,
             title: isExam ? 'Tambah Soal Ujian' : 'Tambah Soal Modul',
             subtitle: isExam
-                ? 'Pilih tambah manual atau upload soal ujian dari template CSV.'
-                : 'Pilih tambah manual atau upload soal dari template CSV.',
+                ? 'Tambah manual atau import soal ujian dari file AIKEN/CSV.'
+                : 'Tambah manual atau import soal dari file AIKEN/CSV.',
             isWide: true,
             content: this.render({ teacherId, moduleId, courseId, variant })
         });
@@ -56,7 +79,7 @@ export const TeacherQuestionModal = {
                             ? `bg-white ${isExam ? 'text-blue-700' : 'text-purple-700'} shadow-sm`
                             : 'text-slate-500'
                     }">
-                        <i class="fas fa-file-csv mr-2"></i>Upload CSV
+                        <i class="fas fa-file-import mr-2"></i>Import File
                     </button>
                 </div>
 
@@ -143,59 +166,166 @@ export const TeacherQuestionModal = {
 
     renderCsvForm({ teacherId, variant = 'question' }) {
         const isExam = variant === 'exam';
-        const templateUrl = isExam
-            ? TeacherExamApi.getTemplateUrl(teacherId)
-            : TeacherQuestionApi.getTemplateUrl(teacherId);
+        const color = isExam ? 'blue' : 'purple';
 
         return `
-            <form id="question-csv-form" class="space-y-5">
+            <div id="question-import-wrap" class="space-y-5">
                 <div class="${isExam ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'} border rounded-3xl p-5">
                     <div class="flex items-start gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-white ${isExam ? 'text-blue-600' : 'text-purple-600'} flex items-center justify-center text-xl shrink-0">
-                            <i class="fas fa-file-csv"></i>
+                            <i class="fas fa-file-import"></i>
                         </div>
 
                         <div class="min-w-0">
                             <h3 class="font-black text-slate-900">
-                                ${isExam ? 'Upload soal ujian via template CSV' : 'Upload soal via template CSV'}
+                                Import soal dari file
                             </h3>
                             <p class="text-sm text-slate-500 font-semibold mt-1">
-                                Download template dulu, isi soal sesuai format, lalu upload kembali file CSV-nya.
+                                Mendukung 2 format: <b>AIKEN</b> (file .txt) dan <b>CSV standar</b>.
+                                Soal akan di-preview dulu sebelum disimpan.
                             </p>
 
-                            <a href="${templateUrl}" target="_blank" class="inline-flex items-center mt-4 px-4 py-3 rounded-2xl ${
-                                isExam ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'
-                            } text-white font-black text-sm">
-                                <i class="fas fa-download mr-2"></i>Download Template CSV
-                            </a>
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <button type="button" data-download-template="csv" class="inline-flex items-center px-4 py-3 rounded-2xl bg-${color}-600 hover:bg-${color}-700 text-white font-black text-sm">
+                                    <i class="fas fa-download mr-2"></i>Template CSV
+                                </button>
+
+                                <button type="button" data-download-template="aiken" class="inline-flex items-center px-4 py-3 rounded-2xl bg-white border border-${color}-200 text-${color}-700 hover:bg-${color}-50 font-black text-sm">
+                                    <i class="fas fa-download mr-2"></i>Template AIKEN (.txt)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
+                        <div class="bg-white/70 rounded-2xl p-4 text-xs font-semibold text-slate-600 leading-relaxed">
+                            <p class="font-black text-slate-800 mb-1">Format AIKEN (.txt)</p>
+                            <pre class="whitespace-pre-wrap font-mono text-[11px] text-slate-500">Teks pertanyaan
+A. opsi
+B. opsi
+C. opsi
+D. opsi
+ANSWER: A</pre>
+                        </div>
+
+                        <div class="bg-white/70 rounded-2xl p-4 text-xs font-semibold text-slate-600 leading-relaxed">
+                            <p class="font-black text-slate-800 mb-1">Format CSV standar</p>
+                            <pre class="whitespace-pre-wrap font-mono text-[11px] text-slate-500">question,option_a,option_b,
+option_c,option_d,answer,
+explanation</pre>
                         </div>
                     </div>
                 </div>
 
                 <label id="csv-dropzone" class="block cursor-pointer bg-white border-2 border-dashed border-slate-300 hover:${isExam ? 'border-blue-300' : 'border-purple-300'} rounded-3xl p-8 text-center transition">
-                    <input id="question-csv-input" name="csv" type="file" accept=".csv,text/csv" class="hidden" required>
+                    <input id="question-csv-input" name="csv" type="file" accept=".csv,.txt,text/csv,text/plain" class="hidden">
 
                     <div class="w-16 h-16 mx-auto rounded-2xl ${isExam ? 'bg-blue-50 text-blue-600' : 'bg-purple-50 text-purple-600'} flex items-center justify-center text-2xl mb-4">
                         <i class="fas fa-file-arrow-up"></i>
                     </div>
 
                     <h4 class="font-black text-slate-900">
-                        Upload atau drag dokumen CSV
+                        Upload atau drag file soal
                     </h4>
                     <p id="csv-file-label" class="text-sm text-slate-400 font-semibold mt-2">
-                        Klik area ini untuk memilih file template yang sudah diisi.
+                        File .txt (AIKEN) atau .csv (template standar).
                     </p>
                 </label>
 
+                <div id="import-preview-area" class="hidden"></div>
+
                 <div class="flex justify-end pt-4 border-t border-slate-100">
-                    <button id="upload-question-csv-btn" class="px-5 py-3 rounded-2xl ${
+                    <button type="button" id="upload-question-csv-btn" disabled class="px-5 py-3 rounded-2xl ${
                         isExam ? 'bg-blue-600 hover:bg-blue-700' : 'bg-purple-600 hover:bg-purple-700'
-                    } text-white font-black text-sm flex items-center justify-center gap-2">
-                        <span class="btn-label"><i class="fas fa-upload mr-2"></i>Upload Soal</span>
-                        <span class="btn-loading hidden"><i class="fas fa-spinner fa-spin mr-2"></i>Mengupload...</span>
+                    } text-white font-black text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span class="btn-label"><i class="fas fa-file-circle-check mr-2"></i>Import Soal</span>
+                        <span class="btn-loading hidden"><i class="fas fa-spinner fa-spin mr-2"></i>Mengimport...</span>
                     </button>
                 </div>
-            </form>
+            </div>
+        `;
+    },
+
+    renderImportPreview({ result, variant = 'question' }) {
+        const isExam = variant === 'exam';
+        const color = isExam ? 'blue' : 'purple';
+        const formatLabel = result.format === 'csv' ? 'CSV standar' : 'AIKEN';
+
+        const errorSection = result.errors.length
+            ? `
+                <div class="bg-red-50 border border-red-100 rounded-2xl p-4">
+                    <p class="text-sm font-black text-red-700 mb-2">
+                        <i class="fas fa-triangle-exclamation mr-1"></i>
+                        ${result.errors.length} baris bermasalah (dilewati saat import):
+                    </p>
+                    <ul class="space-y-1 max-h-40 overflow-y-auto">
+                        ${result.errors.map(err => `
+                            <li class="text-xs font-semibold text-red-600">
+                                Baris ${err.line}: ${err.message}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `
+            : '';
+
+        const questionList = result.questions.length
+            ? `
+                <div class="space-y-2 max-h-72 overflow-y-auto pr-1">
+                    ${result.questions.map((question, index) => `
+                        <div class="bg-white border border-slate-200 rounded-2xl p-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <p class="text-xs font-black text-${color}-600 mb-1">Soal ${index + 1}</p>
+                                <span class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-black shrink-0">
+                                    Jawaban: ${question.correct_answer}
+                                </span>
+                            </div>
+
+                            <p class="text-sm font-black text-slate-900 leading-relaxed">${question.question_text}</p>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-1 mt-2 text-xs font-bold text-slate-500">
+                                <p>A. ${question.option_a}</p>
+                                <p>B. ${question.option_b}</p>
+                                <p>C. ${question.option_c}</p>
+                                <p>D. ${question.option_d}</p>
+                            </div>
+
+                            ${question.explanation ? `
+                                <p class="text-xs font-semibold text-slate-400 mt-2">
+                                    <i class="fas fa-lightbulb mr-1"></i>${question.explanation}
+                                </p>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            `
+            : `
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 text-center">
+                    <p class="text-sm font-black text-slate-500">Tidak ada soal valid yang bisa diimport.</p>
+                </div>
+            `;
+
+        return `
+            <div class="space-y-4">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-3 py-2 rounded-xl bg-${color}-100 text-${color}-700 text-xs font-black">
+                        Format terdeteksi: ${formatLabel}
+                    </span>
+
+                    <span class="px-3 py-2 rounded-xl bg-emerald-100 text-emerald-700 text-xs font-black">
+                        ${result.questions.length} soal berhasil dibaca
+                    </span>
+
+                    ${result.errors.length ? `
+                        <span class="px-3 py-2 rounded-xl bg-red-100 text-red-700 text-xs font-black">
+                            ${result.errors.length} baris error
+                        </span>
+                    ` : ''}
+                </div>
+
+                ${errorSection}
+                ${questionList}
+            </div>
         `;
     },
 
@@ -359,6 +489,7 @@ export const TeacherQuestionModal = {
             e.preventDefault();
 
             if (this.isSubmitting) return;
+            if (!this.validateContextIds({ moduleId, courseId, variant })) return;
 
             const form = e.target;
             const formData = new FormData(form);
@@ -402,13 +533,74 @@ export const TeacherQuestionModal = {
         const csvInput = document.getElementById('question-csv-input');
         const csvLabel = document.getElementById('csv-file-label');
         const dropzone = document.getElementById('csv-dropzone');
+        const previewArea = document.getElementById('import-preview-area');
+        const importBtn = document.getElementById('upload-question-csv-btn');
 
-        csvInput?.addEventListener('change', () => {
-            const file = csvInput.files?.[0];
-            if (csvLabel && file) {
-                csvLabel.textContent = file.name;
-            }
+        // Hasil parsing terakhir; tombol import hanya aktif jika ada soal valid.
+        this.parsedImport = null;
+
+        // Download template dibuat client-side (Blob) supaya tetap jalan
+        // walau backend belum ter-deploy versi terbaru.
+        document.querySelectorAll('[data-download-template]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const type = btn.dataset.downloadTemplate;
+                const content = IMPORT_TEMPLATES[type];
+                const fileName = type === 'csv' ? 'template-soal.csv' : 'template-soal-aiken.txt';
+                const mime = type === 'csv' ? 'text/csv' : 'text/plain';
+
+                const blob = new Blob([content], { type: `${mime};charset=utf-8` });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = fileName;
+                link.click();
+                URL.revokeObjectURL(url);
+            });
         });
+
+        const handleFile = async file => {
+            if (!file) return;
+
+            if (csvLabel) csvLabel.textContent = file.name;
+
+            let text = '';
+
+            try {
+                text = await file.text();
+            } catch {
+                AppToast.error('Gagal membaca file. Coba pilih ulang.');
+                return;
+            }
+
+            const result = parseImportFile(file.name, text);
+            this.parsedImport = result;
+
+            if (previewArea) {
+                previewArea.innerHTML = this.renderImportPreview({ result, variant });
+                previewArea.classList.remove('hidden');
+            }
+
+            if (importBtn) {
+                importBtn.disabled = !result.questions.length;
+
+                const label = importBtn.querySelector('.btn-label');
+                if (label) {
+                    label.innerHTML = result.questions.length
+                        ? `<i class="fas fa-file-circle-check mr-2"></i>Import ${result.questions.length} Soal`
+                        : `<i class="fas fa-file-circle-check mr-2"></i>Import Soal`;
+                }
+            }
+
+            if (!result.questions.length) {
+                AppToast.error('Tidak ada soal valid di file ini. Periksa daftar error di preview.');
+            } else if (result.errors.length) {
+                AppToast.warning(`${result.questions.length} soal terbaca, ${result.errors.length} baris error dilewati.`);
+            } else {
+                AppToast.success(`${result.questions.length} soal berhasil dibaca. Cek preview lalu klik Import.`);
+            }
+        };
+
+        csvInput?.addEventListener('change', () => handleFile(csvInput.files?.[0]));
 
         dropzone?.addEventListener('dragover', e => {
             e.preventDefault();
@@ -430,70 +622,63 @@ export const TeacherQuestionModal = {
             dt.items.add(file);
             csvInput.files = dt.files;
 
-            if (csvLabel) {
-                csvLabel.textContent = file.name;
-            }
+            handleFile(file);
         });
 
-        document.getElementById('question-csv-form')?.addEventListener('submit', async e => {
-            e.preventDefault();
-
+        importBtn?.addEventListener('click', async () => {
             if (this.isSubmitting) return;
+            if (!this.validateContextIds({ moduleId, courseId, variant })) return;
 
-            const form = e.target;
-            const formData = new FormData(form);
-            const csvFile = formData.get('csv');
-            const submitBtn = document.getElementById('upload-question-csv-btn');
+            const parsed = this.parsedImport;
 
-            const runImport = async (replaceOld = false) => {
-                this.setLoading(submitBtn, true);
+            if (!parsed?.questions?.length) {
+                AppToast.warning('Upload file soal dulu sebelum import.');
+                return;
+            }
+
+            const runImport = async (mode = 'append') => {
+                this.setLoading(importBtn, true);
 
                 try {
                     this.isSubmitting = true;
 
-                    if (replaceOld && this.currentQuestions.length) {
-                        if (variant === 'exam') {
-                            await TeacherExamApi.deleteExamQuestions({
-                                teacherId,
-                                courseId,
-                                questionIds: []
-                            });
-                        } else {
-                            await TeacherQuestionApi.deleteQuestions({
-                                teacherId,
-                                moduleId,
-                                questionIds: []
-                            });
-                        }
+                    if (variant === 'exam') {
+                        await TeacherExamApi.syncExamQuestions({
+                            teacherId,
+                            courseId,
+                            mode,
+                            questions: parsed.questions
+                        });
+                    } else {
+                        await TeacherQuestionApi.syncQuestions({
+                            teacherId,
+                            moduleId,
+                            mode,
+                            questions: parsed.questions
+                        });
                     }
 
-                    await TeacherQuestionApi.importQuestionsCsv({
-                        teacherId,
-                        moduleId,
-                        csvFile
-                    });
-
-                    AppToast.success('Import soal berhasil.');
-                    ReusableModal.close('teacher-question-modal-root');
+                    AppToast.success(`${parsed.questions.length} soal berhasil diimport.`);
+                    ReusableModal.close(variant === 'exam' ? 'teacher-exam-modal-root' : 'teacher-question-modal-root');
 
                     await onSuccess?.();
                 } catch (error) {
                     AppToast.error(error.message);
                 } finally {
                     this.isSubmitting = false;
-                    this.setLoading(submitBtn, false);
+                    this.setLoading(importBtn, false);
                 }
             };
 
             if (this.currentQuestions.length) {
                 AppConfirmModal.open({
                     title: 'Soal lama sudah ada',
-                    message: 'Modul ini sudah memiliki soal. Mau digabung dengan soal lama atau ganti semua soal lama?',
+                    message: `Sudah ada ${this.currentQuestions.length} soal. Mau digabung dengan soal lama atau ganti semua soal lama?`,
                     type: 'warning',
                     confirmText: 'Gabungkan',
                     cancelText: 'Ganti Semua',
                     onConfirm: async () => {
-                        await runImport(false);
+                        await runImport('append');
                     }
                 });
 
@@ -502,12 +687,12 @@ export const TeacherQuestionModal = {
 
                     AppConfirmModal.open({
                         title: 'Ganti semua soal?',
-                        message: 'Semua soal lama pada modul ini akan dihapus dan diganti dengan isi CSV.',
+                        message: 'Semua soal lama akan dihapus dan diganti dengan isi file ini.',
                         type: 'danger',
                         confirmText: 'Ya, Ganti',
                         danger: true,
                         onConfirm: async () => {
-                            await runImport(true);
+                            await runImport('replace');
                         }
                     });
                 });
@@ -515,7 +700,7 @@ export const TeacherQuestionModal = {
                 return;
             }
 
-            await runImport(false);
+            await runImport('append');
         });
     },
 
@@ -596,20 +781,24 @@ export const TeacherQuestionModal = {
                     try {
                         this.isSubmitting = true;
 
-                        // Data array dari semua input soal sudah terkumpul di sini:
-                        const questions = this.collectBulkQuestions(); 
+                        if (!this.validateContextIds({ moduleId, courseId, variant })) return;
 
-                        // Sesuai dengan service API Bulk yang kamu miliki (contoh):
+                        // Data array dari semua input soal sudah terkumpul di sini:
+                        const questions = this.collectBulkQuestions();
+
+                        // Simpan lewat endpoint sync (mode append = gabung, sync/replace = timpa)
                         if (variant === 'exam') {
-                            await TeacherExamApi.createBulkExamQuestions({
+                            await TeacherExamApi.syncExamQuestions({
                                 teacherId,
                                 courseId,
+                                mode,
                                 questions
                             });
                         } else {
-                            await TeacherQuestionApi.createBulkQuestions({
+                            await TeacherQuestionApi.syncQuestions({
                                 teacherId,
                                 moduleId,
+                                mode,
                                 questions
                             });
                         }
@@ -857,11 +1046,14 @@ export const TeacherQuestionModal = {
         theme = 'blue'
     }) {
         const firstQuestion = questions[0];
-    
+
         if (!firstQuestion) {
             return AppToast.warning('Belum ada soal untuk ditampilkan.');
         }
-    
+
+        // Selalu mulai preview dari soal pertama setiap kali dibuka.
+        this.previewIndex = 0;
+
         ReusableModal.open({
             rootId: 'teacher-question-preview-root',
             zIndex: 12000,
@@ -944,17 +1136,17 @@ export const TeacherQuestionModal = {
     
                 <div class="flex items-center justify-between gap-3">
                     <p class="text-xs md:text-sm text-slate-400 font-semibold">${total} soal</p>
-    
+
                     <div class="flex items-center gap-2">
-                        <button id="preview-prev-btn" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100">
+                        <button id="preview-prev-btn" ${index <= 0 ? 'disabled' : ''} class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent">
                             Prev
                         </button>
-    
+
                         <span id="preview-counter" class="px-3 py-2 rounded-xl bg-slate-50 text-slate-600 font-bold text-xs">
                             ${index + 1}/${total}
                         </span>
-    
-                        <button id="preview-next-btn" class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100">
+
+                        <button id="preview-next-btn" ${index >= total - 1 ? 'disabled' : ''} class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent">
                             Next
                         </button>
                     </div>
@@ -966,30 +1158,50 @@ export const TeacherQuestionModal = {
     bindPreviewModalEvents({ theme = 'blue' }) {
         const dataEl = document.getElementById('exam-preview-data');
         const root = document.getElementById('exam-preview-content');
-    
+
         if (!dataEl || !root) return;
-    
+
         let questions = [];
-        let activeIndex = 0;
-    
+
         try {
             questions = JSON.parse(dataEl.textContent || '[]');
         } catch {
             questions = [];
         }
-    
+
+        if (!questions.length) return;
+
+        // State indeks disimpan di properti instance, BUKAN variabel closure.
+        // Sebelumnya activeIndex di-reset ke 0 tiap re-bind sehingga navigasi
+        // melompat (mis. 2/12 -> 12/12). Sekarang navigasi maju/mundur 1 langkah.
+        if (typeof this.previewIndex !== 'number') {
+            this.previewIndex = 0;
+        }
+
+        // Jaga indeks tetap dalam rentang valid (clamp, tanpa wrap-around).
+        this.previewIndex = Math.max(0, Math.min(this.previewIndex, questions.length - 1));
+
         const renderAt = index => {
-            activeIndex = index;
-            root.innerHTML = this.renderPreviewSlide(questions[activeIndex], activeIndex, questions.length, theme);
+            this.previewIndex = Math.max(0, Math.min(index, questions.length - 1));
+            root.innerHTML = this.renderPreviewSlide(
+                questions[this.previewIndex],
+                this.previewIndex,
+                questions.length,
+                theme
+            );
             this.bindPreviewModalEvents({ theme });
         };
-    
+
         document.getElementById('preview-next-btn')?.addEventListener('click', () => {
-            renderAt((activeIndex + 1) % questions.length);
+            if (this.previewIndex < questions.length - 1) {
+                renderAt(this.previewIndex + 1);
+            }
         });
-    
+
         document.getElementById('preview-prev-btn')?.addEventListener('click', () => {
-            renderAt(activeIndex - 1 < 0 ? questions.length - 1 : activeIndex - 1);
+            if (this.previewIndex > 0) {
+                renderAt(this.previewIndex - 1);
+            }
         });
     },
     openExamTimerModal({ teacherId, courseId, currentDuration = 10, onSuccess }) {

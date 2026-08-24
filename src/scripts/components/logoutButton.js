@@ -1,4 +1,5 @@
 import { CONFIG } from '../config/index.js';
+import { AppConfirmModal } from './appConfirmModal.js';
 
 export const LogoutButton = {
     init() {
@@ -6,9 +7,18 @@ export const LogoutButton = {
         if (!btn) return;
 
         btn.addEventListener('click', () => {
-            localStorage.removeItem(CONFIG.STORAGE_KEY);
-            localStorage.removeItem(CONFIG.USER_INFO);
-            window.location.href = '/login';
+            AppConfirmModal.open({
+                title: 'Keluar dari Dashboard?',
+                message: 'Apakah Anda yakin ingin keluar dari akun ini? Anda harus login kembali untuk mengakses dashboard.',
+                type: 'danger',
+                confirmText: 'Logout',
+                cancelText: 'Batalkan',
+                onConfirm: () => {
+                    localStorage.removeItem(CONFIG.STORAGE_KEY);
+                    localStorage.removeItem(CONFIG.USER_INFO);
+                    window.location.href = '/login';
+                }
+            });
         });
     }
 };

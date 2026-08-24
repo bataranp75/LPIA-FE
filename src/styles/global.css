@@ -1,41 +1,135 @@
+html {
+  scroll-behavior: smooth;
+}
+
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #3b82f6;
-  --color-primary-dark: #1d4ed8;
-  --color-primary-light: #93c5fd;
+  --color-primary: #0F3B66;
+  --color-primary-dark: #0A2540;
+  --color-primary-light: #3E6CA0;
+  --color-accent: #E25822;
+  --color-accent-light: #F0785F;
+
+  /* Remap default Tailwind blue → palet tinta LPIA agar konsisten di seluruh halaman */
+  --color-blue-50: #EFF6FF;
+  --color-blue-100: #DBEAFE;
+  --color-blue-200: #B6D4F2;
+  --color-blue-300: #7FA8D9;
+  --color-blue-400: #4F82BD;
+  --color-blue-500: #2E67A3;
+  --color-blue-600: #0F3B66;
+  --color-blue-700: #0A2540;
+  --color-blue-800: #061E33;
+  --color-blue-900: #041524;
 }
 
-/* Base Style */
 :root {
-  --font-sandman: 'montserrat', cursive;
+  --font-display: 'Merriweather', 'Georgia', serif;
+  --font-body: 'DM Sans', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --color-ink: #0A2540;
+  --color-body: #4A4E57;
+  --color-muted: #7A7F8A;
+  --color-hairline: #E5E9F0;
+  --color-surface-soft: #EFF6FF;
+  --color-surface-base: #F8FAFC;
 }
 
 body {
-  font-family: var(--font-sandman), 'Comic Sans MS', sans-serif;
+  font-family: var(--font-body);
+  background: var(--color-surface-base);
+  color: var(--color-ink);
+  text-rendering: optimizeLegibility;
 }
 
-/* Background Texture ala Back to School */
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* ─── Navbar: state di atas hero (gelap) vs saat scroll (putih blur) ─── */
+#main-navbar.nav-hero:not(.nav-solid) {
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+}
+#main-navbar.nav-hero:not(.nav-solid) .nav-brand { color: #ffffff; }
+#main-navbar.nav-hero:not(.nav-solid) .nav-link { color: rgba(255, 255, 255, 0.9); }
+
+/* ─── Hover link navbar (kuat & terlihat) ─── */
+#main-navbar .nav-link-item {
+  position: relative;
+  color: #4A4E57;
+  transition: color 0.25s ease;
+}
+#main-navbar .nav-link-item::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  height: 2px;
+  width: 0;
+  background: #E25822;
+  transition: width 0.3s ease;
+}
+#main-navbar .nav-link-item:hover { color: #0F3B66; }
+#main-navbar .nav-link-item:hover::after { width: 100%; }
+
+/* State transparan di atas hero */
+#main-navbar.nav-hero:not(.nav-solid) .nav-link-item { color: rgba(255, 255, 255, 0.9); }
+#main-navbar.nav-hero:not(.nav-solid) .nav-link-item:hover { color: #E25822; }
+#main-navbar.nav-hero:not(.nav-solid) .nav-link-item::after { background: #E25822; }
+#main-navbar.nav-hero:not(.nav-solid) .nav-toggle {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+#main-navbar.nav-hero:not(.nav-solid) .nav-mobile-menu {
+  background: #0F3B66;
+  color: #ffffff;
+  border-top-color: rgba(255, 255, 255, 0.15);
+}
+#main-navbar.nav-hero:not(.nav-solid) #logout-btn {
+  color: rgba(255, 255, 255, 0.85);
+}
+#main-navbar.nav-hero:not(.nav-solid) #logout-btn:hover { color: #ffffff; }
+
+/* ─── Utilitas Hero ─── */
+.hero-glow {
+  background:
+    radial-gradient(60% 50% at 15% 10%, rgba(255, 255, 255, 0.18), transparent 60%),
+    radial-gradient(45% 45% at 90% 30%, rgba(224, 88, 34, 0.22), transparent 60%);
+}
+
+.hero-card-ring {
+  box-shadow: 0 30px 80px rgba(2, 12, 27, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #main-navbar { transition: none; }
+}
+
+/* Background Texture ala Kertas Arsip */
 .bg-dots {
-  background-color: #ffffff;
-  background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+  background-color: var(--color-surface-base);
+  background-image: radial-gradient(#C5C1B8 1.5px, transparent 1.5px);
   background-size: 25px 25px;
 }
 
 .bg-lines {
-  background-color: #ffffff;
-  background-image: repeating-linear-gradient(transparent, transparent 28px, #e2e8f0 28px, #e2e8f0 30px);
+  background-color: var(--color-surface-base);
+  background-image: repeating-linear-gradient(transparent, transparent 28px, #D9D5CC 28px, #D9D5CC 30px);
 }
 
-/* Efek tombol playful */
+/* Efek tombol dengan gradasi warna brand */
 .btn-school {
-  @apply bg-primary hover:bg-primary-dark text-white px-6 py-2 rounded-xl 
-         shadow-[0_4px_0_#1d4ed8] active:shadow-none active:translate-y-1 
+  @apply bg-gradient-to-br from-[#0F3B66] to-[#0A2540] hover:from-[#0A2540] hover:to-[#061E33] text-white px-6 py-2 rounded-xl 
+         shadow-[0_4px_12px_rgba(15,59,102,0.3)] active:shadow-none active:translate-y-1 
          transition-all font-bold;
 }
 
 .permission-switch:checked + .switch-ui {
-  background-color: #2563eb;
+  background: linear-gradient(135deg, #0F3B66 0%, #3E6CA0 100%);
 }
 
 .permission-switch:checked + .switch-ui .switch-dot {
@@ -79,8 +173,8 @@ body {
   padding: 14px;
   border-radius: 16px;
   color: white;
-  font-family: 'Montserrat', sans-serif;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+  font-family: var(--font-body);
+  box-shadow: 0 18px 40px rgba(26, 29, 32, 0.22);
 }
 
 .app-toast-icon {
@@ -111,20 +205,20 @@ body {
 }
 
 .app-toast-success .app-toast-content {
-  background: #16a34a;
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
 }
 
 .app-toast-error .app-toast-content {
-  background: #dc2626;
+  background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
 }
 
 .app-toast-warning .app-toast-content {
-  background: #f59e0b;
+  background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
 }
 
 .thin-scrollbar {
     scrollbar-width: thin;
-    scrollbar-color: rgba(15, 23, 42, 0.25) transparent;
+    scrollbar-color: rgba(26, 29, 32, 0.25) transparent;
 }
 
 .thin-scrollbar::-webkit-scrollbar {
@@ -137,12 +231,12 @@ body {
 }
 
 .thin-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(15, 23, 42, 0.25);
+    background: rgba(26, 29, 32, 0.25);
     border-radius: 999px;
 }
 
 .thin-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(15, 23, 42, 0.4);
+    background: rgba(26, 29, 32, 0.4);
 }
 
 .dragging-card {
@@ -190,4 +284,92 @@ body {
     transform: translateY(-2px);
     border-color: rgba(168, 85, 247, 0.25);
     box-shadow: 0 18px 35px rgba(15, 23, 42, 0.08);
+}
+
+/* ─── Dashboard Guru: animasi & polishing ─── */
+
+/* Modal masuk: overlay fade + card pop */
+@keyframes modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modal-pop-in {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-fade-in {
+    animation: modal-fade-in 200ms ease-out both;
+}
+
+.modal-pop-in {
+    animation: modal-pop-in 260ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+/* Hover lift untuk card course di dashboard guru */
+.course-card-hover {
+    transition:
+        transform 220ms ease,
+        box-shadow 220ms ease,
+        border-color 220ms ease;
+}
+
+.course-card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px rgba(26, 29, 32, 0.12);
+}
+
+.course-card-hover .card-arrow {
+    transition: transform 220ms ease;
+}
+
+.course-card-hover:hover .card-arrow {
+    transform: translateX(4px);
+}
+
+.course-scrollbar {
+    scrollbar-width: none;
+}
+
+.course-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Stat card muncul halus saat render */
+@keyframes stat-fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-card {
+    animation: stat-fade-up 320ms ease-out both;
+}
+
+.stat-card:nth-child(2) { animation-delay: 60ms; }
+.stat-card:nth-child(3) { animation-delay: 120ms; }
+
+@media (prefers-reduced-motion: reduce) {
+    .modal-fade-in,
+    .modal-pop-in,
+    .stat-card {
+        animation: none;
+    }
+
+    .course-card-hover,
+    .course-card-hover .card-arrow {
+        transition: none;
+    }
 }

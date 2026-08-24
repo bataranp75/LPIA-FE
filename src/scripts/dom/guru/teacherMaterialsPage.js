@@ -3,15 +3,19 @@ import { AppToast } from '../../components/toast';
 import { TeacherCourseWorkspace } from '../../components/teacherCourseWorkspace';
 import { TeacherQuestionWorkspace } from '../../components/teacherQuestionWorkspace';
 import { TeacherQuestionModal } from '../../components/teacherQuestionModal';
+import { TeacherQuestionApi } from '../../components/teacherQuestionApi';
 import { TeacherChildModal } from '../../components/teacherChildModal';
 import { AppConfirmModal } from '../../components/appConfirmModal';
 import { TeacherExamWorkspace } from '../../components/teacherExamWorkspace';
 import { TeacherExamApi } from '../../fetch/teacherExamApi';
+import { CONFIG } from '../../config/index.js';
+import { ExamSimulator } from '../../components/examSimulator';
 
 const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:3000/api/v1';
 
 export const TeacherMaterialsPage = {
     teacherId: null,
+    teacherFeatureMode: 'materi',
     courses: [],
     modules: [],
     materials: [],
@@ -32,12 +36,17 @@ export const TeacherMaterialsPage = {
     materialCurrentPage: 1,
     materialLimit: 10,
 
+    courseSearchKeyword: '',
+    courseFilterId: 'all',
+    courseSearchDebounce: null,
+
     searchDebounce: null,
     moduleReorderDebounce: null,
     materialReorderDebounce: null,
 
     isSavingModuleOrder: false,
     isSavingMaterialOrder: false,
+    isSubmittingModule: false,
 
     lastModuleOrderSignature: '',
     lastMaterialOrderSignature: '',
@@ -52,15 +61,320 @@ export const TeacherMaterialsPage = {
         }
 
         this.teacherId = userData.id;
+        this.teacherFeatureMode = this.getFeatureModeFromUrl();
+        this.activeWorkspaceMode = this.teacherFeatureMode === 'soal' ? 'soal' : 'materi';
+
+        this.updateSidebarHighlight();
+        this.updateHeaderAndBreadcrumb();
 
         await this.loadTeacherDashboard();
+        this.renderDashboardStats();
+        this.renderDashboardToolbar();
         this.renderCourses();
     },
 
+    updateSidebarHighlight() {
+        const currentMode = this.teacherFeatureMode;
+        document.querySelectorAll('.guru-menu-link').forEach(link => {
+            const mode = link.getAttribute('data-mode');
+            const href = link.getAttribute('data-href');
+            const icon = link.querySelector('i');
+            if (mode) {
+                if (mode === currentMode) {
+                    link.className = 'flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 guru-menu-link bg-blue-50 text-blue-700 border border-blue-200';
+                    if (icon) icon.className = icon.className.replace('text-center', 'text-center text-blue-600');
+                } else {
+                    link.className = 'flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-sm transition-all duration-200 guru-menu-link text-slate-600 hover:bg-slate-100 hover:text-slate-900 border border-transparent';
+                    if (icon) icon.className = icon.className.replace(' text-blue-600', '');
+                }
+            }
+        });
+    },
+
+    updateHeaderAndBreadcrumb() {
+        const copy = {
+            modul: {
+                title: 'Kelola Modul',
+                desc: 'Pilih kursus yang Anda ampu, lalu tambah, edit, hapus, dan atur urutan modul.',
+                icon: 'fa-folder-open',
+                accent: 'text-amber-600 bg-amber-50'
+            },
+            materi: {
+                title: 'Kelola Materi',
+                desc: 'Pilih kursus yang Anda ampu, lalu upload, edit, hapus, dan atur urutan materi PDF.',
+                icon: 'fa-file-pdf',
+                accent: 'text-blue-600 bg-blue-50'
+            },
+            soal: {
+                title: 'Kelola Soal',
+                desc: 'Pilih kursus yang Anda ampu, lalu kelola soal latihan berdasarkan modul.',
+                icon: 'fa-circle-question',
+                accent: 'text-purple-600 bg-purple-50'
+            },
+            ujian: {
+                title: 'Kelola Ujian',
+                desc: 'Pilih kursus yang Anda ampu, lalu kelola soal ujian course dan setting timer.',
+                icon: 'fa-file-circle-check',
+                accent: 'text-cyan-600 bg-cyan-50'
+            }
+        };
+
+        const currentMode = this.teacherFeatureMode;
+        const pageCopy = copy[currentMode] || copy.modul;
+
+        const iconContainer = document.querySelector('#teacher-materials-page .mb-8 .shrink-0');
+        const breadcrumbEl = document.querySelector('#teacher-materials-page .min-w-0 p');
+        const titleEl = document.querySelector('#teacher-materials-page .min-w-0 h1');
+        const descEl = document.querySelector('#teacher-materials-page .min-w-0 p.text-slate-400');
+
+        if (iconContainer) {
+            iconContainer.className = `hidden sm:flex w-14 h-14 rounded-2xl items-center justify-center text-xl shrink-0 ${pageCopy.accent}`;
+            const icon = iconContainer.querySelector('i');
+            if (icon) {
+                icon.className = `fas ${pageCopy.icon}`;
+            }
+        }
+
+        if (breadcrumbEl) {
+            breadcrumbEl.textContent = `Dashboard Guru / ${pageCopy.title}`;
+        }
+
+        if (titleEl) {
+            titleEl.textContent = pageCopy.title;
+        }
+
+        if (descEl) {
+            descEl.textContent = pageCopy.desc;
+        }
+    },
+
+    getCourseAggregates(course) {
+        const modules = course.modules || [];
+        const materialCount = modules.reduce((sum, m) => sum + (m.materials?.length || 0), 0);
+        
+        // Soal latihan: dari modul atau course.questions (is_exam = false)
+        let questionCount = 0;
+        if (Array.isArray(course.questions)) {
+            questionCount = course.questions.filter(q => !q.is_exam).length;
+        } else {
+            questionCount = modules.reduce(
+                (sum, m) => sum + (m.questions?.filter(q => !q.is_exam).length || 0),
+                0
+            );
+        }
+
+        // Soal ujian: dari course.questions (is_exam = true)
+        let examQuestionCount = 0;
+        if (Array.isArray(course.questions)) {
+            examQuestionCount = course.questions.filter(q => q.is_exam).length;
+        } else {
+            examQuestionCount = modules.reduce(
+                (sum, m) => sum + (m.questions?.filter(q => q.is_exam).length || 0),
+                0
+            );
+        }
+
+        return {
+            moduleCount: modules.length,
+            materialCount,
+            questionCount,
+            examQuestionCount
+        };
+    },
+
+    formatDate(value) {
+        if (!value) return '-';
+
+        try {
+            return new Date(value).toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        } catch {
+            return '-';
+        }
+    },
+
+    renderDashboardStats() {
+        const wrap = document.getElementById('teacher-dashboard-stats');
+        if (!wrap) return;
+
+        const totals = this.courses.reduce(
+            (acc, course) => {
+                const agg = this.getCourseAggregates(course);
+                acc.modules += agg.moduleCount;
+                acc.materials += agg.materialCount;
+                acc.questions += agg.questionCount;
+                acc.examQuestions += agg.examQuestionCount;
+                return acc;
+            },
+            { modules: 0, materials: 0, questions: 0, examQuestions: 0 }
+        );
+
+        const publishedCourses = this.courses.filter(c => (c.status || '').toLowerCase() === 'published').length;
+        const draftCourses = this.courses.length - publishedCourses;
+        const coursesWithExam = this.courses.filter(c => this.getCourseAggregates(c).examQuestionCount > 0).length;
+
+        const statMap = {
+            modul: [
+                { label: 'Total Kursus', value: this.courses.length, icon: 'fa-book-open', accent: 'bg-blue-50 text-blue-600' },
+                { label: 'Modul Aktif', value: totals.modules, icon: 'fa-folder-open', accent: 'bg-amber-50 text-amber-600' },
+                { label: 'Draft Course', value: draftCourses, icon: 'fa-file-pen', accent: 'bg-slate-100 text-slate-600' }
+            ],
+            materi: [
+                { label: 'Total Kursus', value: this.courses.length, icon: 'fa-book-open', accent: 'bg-blue-50 text-blue-600' },
+                { label: 'Total Materi PDF', value: totals.materials, icon: 'fa-file-pdf', accent: 'bg-red-50 text-red-600' },
+                { label: 'Total Modul', value: totals.modules, icon: 'fa-folder-open', accent: 'bg-amber-50 text-amber-600' }
+            ],
+            soal: [
+                { label: 'Total Soal', value: totals.questions, icon: 'fa-circle-question', accent: 'bg-purple-50 text-purple-600' },
+                { label: 'Pilihan Ganda', value: totals.questions, icon: 'fa-list-check', accent: 'bg-fuchsia-50 text-fuchsia-600' },
+                { label: 'Soal Ujian', value: totals.examQuestions, icon: 'fa-file-circle-check', accent: 'bg-cyan-50 text-cyan-600' }
+            ],
+            ujian: [
+                { label: 'Ujian Tersedia', value: coursesWithExam, icon: 'fa-file-circle-check', accent: 'bg-cyan-50 text-cyan-600' },
+                { label: 'Total Soal Ujian', value: totals.examQuestions, icon: 'fa-circle-question', accent: 'bg-blue-50 text-blue-600' },
+                { label: 'Total Kursus', value: this.courses.length, icon: 'fa-book-open', accent: 'bg-slate-100 text-slate-600' }
+            ]
+        };
+
+        const stats = statMap[this.teacherFeatureMode] || statMap.materi;
+
+        wrap.innerHTML = stats.map(item => `
+            <div class="stat-card bg-white border border-slate-200 rounded-3xl p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl ${item.accent} flex items-center justify-center text-lg shrink-0">
+                    <i class="fas ${item.icon}"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-wide truncate">${item.label}</p>
+                    <h3 class="text-2xl font-black text-slate-900 mt-0.5">${item.value}</h3>
+                </div>
+            </div>
+        `).join('');
+    },
+
+    renderDashboardToolbar() {
+        const wrap = document.getElementById('teacher-dashboard-toolbar');
+        if (!wrap) return;
+
+        if (this.teacherFeatureMode !== 'materi') {
+            wrap.innerHTML = '';
+            wrap.classList.add('hidden');
+            return;
+        }
+
+        wrap.classList.remove('hidden');
+        wrap.innerHTML = `
+            <div class="bg-white border border-slate-200 rounded-3xl p-4 shadow-sm flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1 min-w-0">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                    <input
+                        id="course-search-input"
+                        value="${this.courseSearchKeyword}"
+                        class="w-full pl-10 pr-3 py-3 rounded-2xl bg-slate-50 border border-slate-200 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-blue-100"
+                        placeholder="Cari kursus atau materi..."
+                    >
+                </div>
+
+                <select id="course-filter-select" class="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-black text-slate-600 focus:outline-none sm:w-64">
+                    <option value="all">Semua Kursus</option>
+                    ${this.courses.map(course => `
+                        <option value="${course.id}" ${this.courseFilterId === course.id ? 'selected' : ''}>
+                            ${course.title}
+                        </option>
+                    `).join('')}
+                </select>
+            </div>
+        `;
+
+        document.getElementById('course-search-input')?.addEventListener('input', e => {
+            clearTimeout(this.courseSearchDebounce);
+
+            this.courseSearchDebounce = setTimeout(() => {
+                this.courseSearchKeyword = e.target.value;
+                this.renderCourses();
+            }, 250);
+        });
+
+        document.getElementById('course-filter-select')?.addEventListener('change', e => {
+            this.courseFilterId = e.target.value;
+            this.renderCourses();
+        });
+    },
+
+    getVisibleCourses() {
+        let list = [...this.courses];
+
+        if (this.teacherFeatureMode === 'materi') {
+            if (this.courseFilterId !== 'all') {
+                list = list.filter(course => course.id === this.courseFilterId);
+            }
+
+            const keyword = this.courseSearchKeyword.trim().toLowerCase();
+
+            if (keyword) {
+                list = list.filter(course =>
+                    course.title?.toLowerCase().includes(keyword) ||
+                    course.description?.toLowerCase().includes(keyword)
+                );
+            }
+        }
+
+        return list;
+    },
+
+    getFeatureModeFromUrl() {
+        const root = document.getElementById('teacher-materials-page');
+        const rootMode = root?.dataset?.featureMode;
+        const params = new URLSearchParams(window.location.search);
+        const mode = params.get('mode') || rootMode || 'modul';
+
+        return ['modul', 'materi', 'soal', 'ujian'].includes(mode) ? mode : 'modul';
+    },
+
+    getFeatureCopy() {
+        const copy = {
+            modul: {
+                label: 'Kelola modul',
+                title: 'Kelola Modul',
+                subtitle: 'Tambah, edit, hapus, dan atur urutan modul pada course ini.',
+                badgeClass: 'bg-amber-50 text-amber-700',
+                icon: 'fa-folder-open'
+            },
+            materi: {
+                label: 'Kelola materi',
+                title: 'Kelola Materi',
+                subtitle: 'Upload, edit, hapus, cari, dan atur urutan materi PDF berdasarkan modul.',
+                badgeClass: 'bg-blue-50 text-blue-700',
+                icon: 'fa-file-pdf'
+            },
+            soal: {
+                label: 'Kelola soal',
+                title: 'Kelola Soal',
+                subtitle: 'Tambah, edit, hapus, upload CSV, dan preview soal latihan modul.',
+                badgeClass: 'bg-purple-50 text-purple-700',
+                icon: 'fa-circle-question'
+            },
+            ujian: {
+                label: 'Kelola ujian',
+                title: 'Kelola Ujian',
+                subtitle: 'Kelola soal ujian course, preview soal, hapus soal, dan setting timer.',
+                badgeClass: 'bg-cyan-50 text-cyan-700',
+                icon: 'fa-file-circle-check'
+            }
+        };
+
+        return copy[this.teacherFeatureMode] || copy.materi;
+    },
+
     async apiFetch(endpoint, options = {}) {
+        const token = localStorage.getItem(CONFIG.STORAGE_KEY);
+
         const res = await fetch(`${API_URL}${endpoint}`, {
             headers: {
                 'Content-Type': 'application/json',
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 ...options.headers
             },
             ...options
@@ -94,46 +408,35 @@ export const TeacherMaterialsPage = {
         const grid = document.getElementById('teacher-courses-grid');
         if (!grid) return;
 
-        if (!this.courses.length) {
+        const visibleCourses = this.getVisibleCourses();
+
+        if (!visibleCourses.length) {
+            const isFiltered = this.teacherFeatureMode === 'materi' && (this.courseSearchKeyword || this.courseFilterId !== 'all');
+
             grid.innerHTML = `
                 <div class="col-span-full bg-white border border-slate-200 rounded-3xl p-10 text-center">
                     <div class="w-16 h-16 mx-auto rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl mb-4">
-                        <i class="fas fa-book"></i>
+                        <i class="fas ${isFiltered ? 'fa-magnifying-glass' : 'fa-book'}"></i>
                     </div>
-                    <h3 class="font-black text-lg">Belum ada kursus</h3>
-                    <p class="text-sm text-slate-400 mt-2">Admin belum meng-enroll kursus ke akun guru ini.</p>
+                    <h3 class="font-black text-lg">${isFiltered ? 'Kursus tidak ditemukan' : 'Belum ada kursus'}</h3>
+                    <p class="text-sm text-slate-400 mt-2">
+                        ${isFiltered ? 'Coba ubah kata kunci atau filter kursus.' : 'Admin belum meng-enroll kursus ke akun guru ini.'}
+                    </p>
                 </div>
             `;
             return;
         }
 
-        grid.innerHTML = this.courses.map(course => `
-            <button data-course-id="${course.id}" class="teacher-course-card text-left bg-white border border-slate-200 rounded-3xl p-5 hover:border-blue-300 hover:shadow-lg transition">
-                <div class="h-36 rounded-2xl bg-slate-100 overflow-hidden mb-5">
-                    ${
-                        course.thumbnail_url
-                            ? `<img src="${course.thumbnail_url}" class="w-full h-full object-cover">`
-                            : `<div class="w-full h-full flex items-center justify-center text-blue-600 text-4xl"><i class="fas fa-book-open"></i></div>`
-                    }
-                </div>
+        const cardRenderer = {
+            modul: course => this.renderCourseCardModul(course),
+            materi: course => this.renderCourseCardMateri(course),
+            soal: course => this.renderCourseCardSoal(course),
+            ujian: course => this.renderCourseCardUjian(course)
+        };
 
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <h3 class="font-black text-lg text-slate-900">${course.title}</h3>
-                        <p class="text-sm text-slate-400 mt-1 line-clamp-2">${course.description || 'Tidak ada deskripsi.'}</p>
-                    </div>
+        const renderCard = cardRenderer[this.teacherFeatureMode] || cardRenderer.materi;
 
-                    <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-black">
-                        ${course.status || 'draft'}
-                    </span>
-                </div>
-
-                <div class="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-bold text-slate-500">
-                    <span>Kelola modul</span>
-                    <i class="fas fa-arrow-right"></i>
-                </div>
-            </button>
-        `).join('');
+        grid.innerHTML = visibleCourses.map(course => renderCard(course)).join('');
 
         document.querySelectorAll('.teacher-course-card').forEach(card => {
             card.addEventListener('click', () => {
@@ -141,6 +444,181 @@ export const TeacherMaterialsPage = {
                 this.openCourseDetail(course);
             });
         });
+    },
+
+    renderCourseStatusBadge(course) {
+        const isPublished = (course.status || '').toLowerCase() === 'published';
+
+        return `
+            <span class="px-3 py-1 rounded-full text-xs font-black shrink-0 ${
+                isPublished ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+            }">
+                ${isPublished ? 'Published' : 'Draft'}
+            </span>
+        `;
+    },
+
+    renderCourseThumbnail(course, fallbackIcon = 'fa-book-open', accent = 'text-blue-600') {
+        return `
+            <div class="h-36 rounded-2xl bg-slate-100 overflow-hidden mb-5">
+                ${
+                    course.thumbnail_url
+                        ? `<img src="${course.thumbnail_url}" class="w-full h-full object-cover" loading="lazy">`
+                        : `<div class="w-full h-full flex items-center justify-center ${accent} text-4xl"><i class="fas ${fallbackIcon}"></i></div>`
+                }
+            </div>
+        `;
+    },
+
+    // A. Kelola Modul — course management card dengan statistik modul & materi
+    renderCourseCardModul(course) {
+        const agg = this.getCourseAggregates(course);
+
+        return `
+            <button data-course-id="${course.id}" class="teacher-course-card course-card-hover text-left bg-white border border-slate-200 rounded-3xl p-5 hover:border-amber-300">
+                ${this.renderCourseThumbnail(course, 'fa-folder-open', 'text-amber-500')}
+
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <h3 class="font-black text-lg text-slate-900 line-clamp-1">${course.title}</h3>
+                        <p class="text-sm text-slate-400 mt-1 line-clamp-2">${course.description || 'Tidak ada deskripsi.'}</p>
+                    </div>
+                    ${this.renderCourseStatusBadge(course)}
+                </div>
+
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                    <div class="rounded-2xl bg-amber-50 p-3 text-center">
+                        <p class="text-lg font-black text-amber-700">${agg.moduleCount}</p>
+                        <p class="text-[10px] uppercase font-black text-amber-600/70">Modul</p>
+                    </div>
+                    <div class="rounded-2xl bg-slate-50 p-3 text-center">
+                        <p class="text-lg font-black text-slate-700">${agg.materialCount}</p>
+                        <p class="text-[10px] uppercase font-black text-slate-400">Materi</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-bold text-amber-600">
+                    <span>Kelola Modul</span>
+                    <i class="fas fa-arrow-right card-arrow"></i>
+                </div>
+            </button>
+        `;
+    },
+
+    // B. Kelola Materi — library card dengan jumlah PDF & last updated
+    renderCourseCardMateri(course) {
+        const agg = this.getCourseAggregates(course);
+        const lastUpdated = this.formatDate(course.updated_at || course.created_at);
+
+        return `
+            <button data-course-id="${course.id}" class="teacher-course-card course-card-hover text-left bg-white border border-slate-200 rounded-3xl p-5 hover:border-blue-300">
+                ${this.renderCourseThumbnail(course, 'fa-book-open', 'text-blue-600')}
+
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <h3 class="font-black text-lg text-slate-900 line-clamp-1">${course.title}</h3>
+                        <p class="text-sm text-slate-400 mt-1 line-clamp-2">${course.description || 'Tidak ada deskripsi.'}</p>
+                    </div>
+                    ${this.renderCourseStatusBadge(course)}
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 text-xs font-black">
+                        <i class="fas fa-folder-open text-[11px]"></i> ${agg.moduleCount} modul
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 text-red-600 text-xs font-black">
+                        <i class="fas fa-file-pdf text-[11px]"></i> ${agg.materialCount} PDF
+                    </span>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-400">
+                    <span><i class="fas fa-clock-rotate-left mr-1.5"></i>Update: ${lastUpdated}</span>
+                    <span class="text-blue-600 text-sm flex items-center gap-2">Kelola Materi <i class="fas fa-arrow-right card-arrow"></i></span>
+                </div>
+            </button>
+        `;
+    },
+
+    // C. Kelola Soal — question bank card
+    renderCourseCardSoal(course) {
+        const agg = this.getCourseAggregates(course);
+
+        return `
+            <button data-course-id="${course.id}" class="teacher-course-card course-card-hover text-left bg-white border border-slate-200 rounded-3xl p-5 hover:border-purple-300">
+                <div class="flex items-start justify-between gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shrink-0">
+                        <i class="fas fa-circle-question"></i>
+                    </div>
+                    ${this.renderCourseStatusBadge(course)}
+                </div>
+
+                <h3 class="font-black text-lg text-slate-900 line-clamp-1">${course.title}</h3>
+                <p class="text-sm text-slate-400 mt-1 line-clamp-2">${course.description || 'Tidak ada deskripsi.'}</p>
+
+                <div class="mt-4 rounded-2xl bg-purple-50/60 border border-purple-100 p-4 flex items-center justify-between">
+                    <div>
+                        <p class="text-2xl font-black text-purple-700">${agg.questionCount}</p>
+                        <p class="text-[11px] font-black text-purple-500 uppercase">Soal tersedia</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm font-black text-slate-600">${agg.moduleCount}</p>
+                        <p class="text-[11px] font-bold text-slate-400">Modul</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-bold text-purple-600">
+                    <span>Kelola Soal</span>
+                    <i class="fas fa-arrow-right card-arrow"></i>
+                </div>
+            </button>
+        `;
+    },
+
+    // D. Kelola Ujian — exam management card
+    renderCourseCardUjian(course) {
+        const agg = this.getCourseAggregates(course);
+        const hasExam = agg.examQuestionCount > 0;
+        
+        const rawSetting = course.course_exam_settings;
+        const duration = Array.isArray(rawSetting)
+            ? rawSetting[0]?.duration_minutes
+            : rawSetting?.duration_minutes;
+            
+        const durationLabel = duration ? `${duration} Menit` : 'Belum diatur';
+
+        return `
+            <button data-course-id="${course.id}" class="teacher-course-card course-card-hover text-left bg-white border border-slate-200 rounded-3xl p-5 hover:border-cyan-300">
+                <div class="flex items-start justify-between gap-3 mb-4">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-xl shrink-0">
+                        <i class="fas fa-file-circle-check"></i>
+                    </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-black shrink-0 ${
+                        hasExam ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+                    }">
+                        ${hasExam ? 'Soal Tersedia' : 'Belum Ada Soal'}
+                    </span>
+                </div>
+
+                <h3 class="font-black text-lg text-slate-900 line-clamp-1">${course.title}</h3>
+                <p class="text-sm text-slate-400 mt-1 line-clamp-2">${course.description || 'Tidak ada deskripsi.'}</p>
+
+                <div class="mt-4 grid grid-cols-2 gap-2">
+                    <div class="rounded-2xl bg-cyan-50/60 border border-cyan-100 p-3">
+                        <p class="text-[10px] uppercase font-black text-cyan-500">Jumlah Soal</p>
+                        <p class="text-lg font-black text-cyan-700 mt-0.5">${agg.examQuestionCount}</p>
+                    </div>
+                    <div class="rounded-2xl bg-slate-50 p-3">
+                        <p class="text-[10px] uppercase font-black text-slate-400">Durasi</p>
+                        <p class="text-lg font-black text-slate-700 mt-0.5"><i class="fas fa-clock text-sm mr-1 text-slate-400"></i>${durationLabel}</p>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between text-sm font-bold text-cyan-600">
+                    <span>Kelola Ujian</span>
+                    <i class="fas fa-arrow-right card-arrow"></i>
+                </div>
+            </button>
+        `;
     },
      async loadCourseExam(courseId) {
         try {
@@ -159,6 +637,8 @@ export const TeacherMaterialsPage = {
     },
     async openCourseDetail(course) {
         this.selectedCourse = course;
+        this.teacherFeatureMode = this.getFeatureModeFromUrl();
+        this.activeWorkspaceMode = this.teacherFeatureMode === 'soal' ? 'soal' : 'materi';
 
         await this.loadCourseDetail(course.id);
         await this.loadCourseExam(course.id);
@@ -199,139 +679,243 @@ export const TeacherMaterialsPage = {
     },
 
     getCourseDetailHTML() {
-        const canCreate = this.permissions?.can_create_material;
-
         if (!this.activeModuleId && this.modules.length) {
             this.activeModuleId = this.modules[0].id;
         }
 
+        const contentMap = {
+            modul: this.renderModuleManagementSectionHTML(),
+            materi: `
+                ${this.renderModuleNavigationSectionHTML()}
+                ${this.renderWorkspaceSectionHTML()}
+            `,
+            soal: `
+                ${this.renderModuleNavigationSectionHTML()}
+                ${this.renderWorkspaceSectionHTML()}
+            `,
+            ujian: this.renderExamOnlySectionHTML()
+        };
+
+        return `
+            <div class="space-y-5">
+                ${this.renderFeatureStatsHTML()}
+                ${contentMap[this.teacherFeatureMode] || contentMap.materi}
+            </div>
+        `;
+    },
+
+    renderFeatureStatsHTML() {
+        const totalQuestions = this.questions.filter(item => !item.is_exam).length;
+        const totalExamQuestions = this.examQuestions.length;
+
+        const statMap = {
+            modul: [
+                { label: 'Total Modul', value: this.modules.length, icon: 'fa-folder-open', className: 'bg-emerald-600 shadow-emerald-100' },
+                { label: 'Course Aktif', value: this.selectedCourse?.status || 'draft', icon: 'fa-book-open', className: 'bg-indigo-600 shadow-indigo-100', isText: true }
+            ],
+            materi: [
+                { label: 'Total Modul', value: this.modules.length, icon: 'fa-folder-open', className: 'bg-emerald-600 shadow-emerald-100' },
+                { label: 'Total Materi', value: this.materials.length, icon: 'fa-file-pdf', className: 'bg-indigo-600 shadow-indigo-100' }
+            ],
+            soal: [
+                { label: 'Total Modul', value: this.modules.length, icon: 'fa-folder-open', className: 'bg-purple-600 shadow-purple-100' },
+                { label: 'Total Soal', value: totalQuestions, icon: 'fa-circle-question', className: 'bg-fuchsia-600 shadow-fuchsia-100' }
+            ],
+            ujian: [
+                { label: 'Soal Ujian', value: totalExamQuestions, icon: 'fa-file-circle-check', className: 'bg-blue-600 shadow-blue-100' },
+                { label: 'Timer', value: `${this.examSetting?.duration_minutes || 10} menit`, icon: 'fa-clock', className: 'bg-cyan-600 shadow-cyan-100', isText: true }
+            ]
+        };
+
+        const stats = statMap[this.teacherFeatureMode] || statMap.materi;
+
+        return `
+            <div class="grid grid-cols-2 gap-3 md:gap-4">
+                ${stats.map(item => `
+                    <div class="${item.className} rounded-3xl p-5 shadow-lg">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-xs font-black text-white/75 uppercase">${item.label}</p>
+                                <h3 class="${item.isText ? 'text-lg md:text-xl truncate' : 'text-3xl'} font-black text-white mt-1">${item.value}</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center shrink-0">
+                                <i class="fas ${item.icon}"></i>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    },
+
+    renderModuleNavigationSectionHTML() {
+        const canCreate = this.permissions?.can_create_material;
         const sortedModules = this.getSortedModules();
         const visibleModules = this.moduleViewMode === 'card' && !this.moduleShowAll
             ? sortedModules.slice(0, 5)
             : sortedModules;
 
+        const featureCopy = this.getFeatureCopy();
+        const showAddModule = this.teacherFeatureMode === 'modul' && canCreate;
+
         return `
-            <div class="space-y-5">
-
-                <div class="grid grid-cols-2 gap-3 md:gap-4">
-                    <div class="bg-emerald-600 rounded-3xl p-5 shadow-lg shadow-emerald-100">
-                        <div class="flex items-center justify-between gap-3">
-                            <div>
-                                <p class="text-xs font-black text-emerald-100 uppercase">Total Modul</p>
-                                <h3 class="text-3xl font-black text-white mt-1">${this.modules.length}</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center">
-                                <i class="fas fa-folder-open"></i>
-                            </div>
+            <section id="teacher-module-section" class="bg-white border border-slate-200 rounded-[1.7rem] md:rounded-3xl p-4 md:p-6 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="w-1.5 h-9 rounded-full bg-blue-600 shrink-0"></span>
+                            <h3 class="text-2xl md:text-3xl font-black text-slate-950 truncate">${featureCopy.title}</h3>
                         </div>
+
+                        <p class="text-sm md:text-base text-slate-500 font-semibold leading-relaxed">
+                            ${featureCopy.subtitle}
+                        </p>
                     </div>
 
-                    <div class="bg-indigo-600 rounded-3xl p-5 shadow-lg shadow-indigo-100">
-                        <div class="flex items-center justify-between gap-3">
-                            <div>
-                                <p class="text-xs font-black text-indigo-100 uppercase">Total Materi</p>
-                                <h3 class="text-3xl font-black text-white mt-1">${this.materials.length}</h3>
-                            </div>
-                            <div class="w-12 h-12 rounded-2xl bg-white/20 text-white flex items-center justify-center">
-                                <i class="fas fa-file-pdf"></i>
-                            </div>
-                        </div>
-                    </div>
+                    ${showAddModule ? `
+                        <button id="add-module-btn" class="w-12 h-12 md:w-auto md:px-5 md:py-3 rounded-2xl bg-slate-950 hover:bg-slate-800 text-white font-black text-sm shrink-0">
+                            <i class="fas fa-folder-plus md:mr-2"></i>
+                            <span class="hidden md:inline">Tambah Modul</span>
+                        </button>
+                    ` : ''}
                 </div>
 
-                <section class="bg-white border border-slate-200 rounded-[1.7rem] md:rounded-3xl p-4 md:p-6 shadow-sm">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="w-1.5 h-9 rounded-full bg-blue-600 shrink-0"></span>
-                                <h3 class="text-2xl md:text-3xl font-black text-slate-950 truncate">Kelola Course</h3>
-                            </div>
-
-                            <p class="text-sm md:text-base text-slate-500 font-semibold leading-relaxed">
-                                Pilih modul, atur urutan, lalu kelola materi, soal, atau ujian.
+                <div class="mt-6 pt-5 border-t border-slate-100">
+                    <div class="flex items-start justify-between gap-3 mb-4">
+                        <div>
+                            <h4 class="text-base font-black text-slate-800">Daftar Modul</h4>
+                            <p class="text-xs text-slate-400 font-bold mt-1">
+                                ${this.teacherFeatureMode === 'modul' ? 'Drag modul untuk mengganti urutan. Gunakan tombol edit/hapus untuk mengelola modul.' : 'Pilih modul yang ingin dikelola.'}
                             </p>
                         </div>
 
-                        ${canCreate ? `
-                            <button id="add-module-btn" class="w-12 h-12 md:w-auto md:px-5 md:py-3 rounded-2xl bg-slate-950 hover:bg-slate-800 text-white font-black text-sm shrink-0">
-                                <i class="fas fa-folder-plus md:mr-2"></i>
-                                <span class="hidden md:inline">Tambah Modul</span>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <select id="module-sort-select" class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-black text-slate-600 focus:outline-none">
+                                <option value="order" ${this.moduleSortMode === 'order' ? 'selected' : ''}>Urutan dibuat</option>
+                                <option value="alpha" ${this.moduleSortMode === 'alpha' ? 'selected' : ''}>Abjad A-Z</option>
+                            </select>
+
+                            <div class="flex gap-1 bg-slate-50 border border-slate-200 rounded-xl p-1">
+                                <button data-module-view="card" class="w-9 h-9 rounded-lg text-xs font-black ${this.moduleViewMode === 'card' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-400'}">
+                                    <i class="fas fa-grip"></i>
+                                </button>
+
+                                <button data-module-view="list" class="w-9 h-9 rounded-lg text-xs font-black ${this.moduleViewMode === 'list' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-400'}">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${this.teacherFeatureMode === 'modul'
+                        ? this.renderModuleManagementHTML(visibleModules)
+                        : this.renderModuleSelectorHTML(visibleModules)
+                    }
+
+                    ${
+                        this.moduleViewMode === 'card' && sortedModules.length > 5
+                            ? `
+                                <div class="mt-4 flex justify-center">
+                                    <button id="toggle-module-show-btn" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-black">
+                                        ${this.moduleShowAll ? 'Tampilkan lebih sedikit' : `Munculkan lainnya (${sortedModules.length - 5})`}
+                                    </button>
+                                </div>
+                            `
+                            : ''
+                    }
+                </div>
+            </section>
+        `;
+    },
+
+    renderModuleManagementSectionHTML() {
+        return this.renderModuleNavigationSectionHTML();
+    },
+
+    renderWorkspaceSectionHTML() {
+        return `
+            <section id="teacher-workspace-section" class="bg-white border border-slate-200 rounded-[1.7rem] md:rounded-3xl p-4 md:p-6 min-h-[420px] shadow-sm">
+                ${this.renderWorkspaceContentHTML()}
+            </section>
+        `;
+    },
+
+    renderExamOnlySectionHTML() {
+        return `
+            <div id="teacher-exam-section">
+                ${this.renderCourseExamSectionHTML()}
+            </div>
+        `;
+    },
+
+    renderModuleManagementHTML(modules) {
+        if (!modules.length) {
+            return `
+                <div class="bg-slate-50 border-2 border-dashed border-slate-200 rounded-3xl p-8 text-center">
+                    <div class="w-14 h-14 mx-auto rounded-2xl bg-white text-slate-400 flex items-center justify-center text-xl mb-4">
+                        <i class="fas fa-folder"></i>
+                    </div>
+                    <h4 class="font-black text-slate-800">Belum ada modul</h4>
+                    <p class="text-sm text-slate-400 font-semibold mt-1">Klik tombol tambah modul untuk membuat modul pertama.</p>
+                </div>
+            `;
+        }
+
+        const gridClass = this.moduleViewMode === 'list'
+            ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3'
+            : 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3';
+
+        return `
+            <div class="${gridClass}" id="module-sortable-area">
+                ${modules.map(module => this.renderModuleManagementItem(module)).join('')}
+            </div>
+        `;
+    },
+
+    renderModuleManagementItem(module) {
+        const moduleMaterials = this.materials.filter(item => item.module_id === module.id).length;
+        const moduleQuestions = this.questions.filter(item => item.module_id === module.id && !item.is_exam).length;
+
+        return `
+            <div 
+                draggable="true"
+                data-module-drag-id="${module.id}"
+                class="module-draggable bg-white border border-amber-100 hover:bg-amber-50 rounded-3xl p-4 transition"
+            >
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center font-black text-base mb-4">
+                            ${this.getModuleInitial(module.title)}
+                        </div>
+                        <h5 class="font-black text-sm text-slate-900 line-clamp-1">${module.title || 'Tanpa Judul'}</h5>
+                        <p class="text-[11px] font-bold text-slate-400 mt-1">Urutan ${module.order_index || 0}</p>
+                    </div>
+
+                    <div class="flex items-center gap-1 shrink-0">
+                        ${this.permissions?.can_update_material ? `
+                            <button data-edit-module="${module.id}" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-blue-600 hover:border-blue-200" title="Edit modul">
+                                <i class="fas fa-pen text-sm"></i>
+                            </button>
+                        ` : ''}
+
+                        ${this.permissions?.can_delete_material ? `
+                            <button data-delete-module="${module.id}" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-red-600 hover:border-red-200" title="Hapus modul">
+                                <i class="fas fa-trash text-sm"></i>
                             </button>
                         ` : ''}
                     </div>
+                </div>
 
-                    <div class="mt-6 pt-5 border-t border-slate-100">
-                        <div class="flex items-start justify-between gap-3 mb-4">
-                            <div>
-                                <h4 class="text-base font-black text-slate-800">Daftar Modul</h4>
-                                <p class="text-xs text-slate-400 font-bold mt-1">
-                                    Drag modul untuk mengganti urutan.
-                                </p>
-                            </div>
-
-                            <div class="flex items-center gap-2 shrink-0">
-                                <select id="module-sort-select" class="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-black text-slate-600 focus:outline-none">
-                                    <option value="order" ${this.moduleSortMode === 'order' ? 'selected' : ''}>Urutan dibuat</option>
-                                    <option value="alpha" ${this.moduleSortMode === 'alpha' ? 'selected' : ''}>Abjad A-Z</option>
-                                </select>
-
-                                <div class="flex gap-1 bg-slate-50 border border-slate-200 rounded-xl p-1">
-                                    <button data-module-view="card" class="w-9 h-9 rounded-lg text-xs font-black ${
-                                        this.moduleViewMode === 'card' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-400'
-                                    }">
-                                        <i class="fas fa-grip"></i>
-                                    </button>
-
-                                    <button data-module-view="list" class="w-9 h-9 rounded-lg text-xs font-black ${
-                                        this.moduleViewMode === 'list' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-400'
-                                    }">
-                                        <i class="fas fa-list"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        ${this.renderModuleSelectorHTML(visibleModules)}
-
-                        ${
-                            this.moduleViewMode === 'card' && sortedModules.length > 5
-                                ? `
-                                    <div class="mt-4 flex justify-center">
-                                        <button id="toggle-module-show-btn" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-black">
-                                            ${this.moduleShowAll ? 'Tampilkan lebih sedikit' : `Munculkan lainnya (${sortedModules.length - 5})`}
-                                        </button>
-                                    </div>
-                                `
-                                : ''
-                        }
+                <div class="mt-4 pt-4 border-t border-slate-100 grid grid-cols-2 gap-2 text-center">
+                    <div class="rounded-2xl bg-slate-50 p-3">
+                        <p class="text-[10px] uppercase font-black text-slate-400">Materi</p>
+                        <p class="text-lg font-black text-slate-900">${moduleMaterials}</p>
                     </div>
-
-                    <div class="mt-6 pt-5 border-t border-slate-100">
-                        <div class="bg-slate-100 border border-slate-200 rounded-2xl p-1 grid grid-cols-2 gap-1">
-                            <button data-workspace-mode="materi" class="px-3 py-3 rounded-xl font-black text-xs md:text-sm transition ${
-                                this.activeWorkspaceMode === 'materi'
-                                    ? 'bg-white text-blue-700 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-800'
-                            }">
-                                <i class="fas fa-file-pdf mr-1 md:mr-2"></i>Materi
-                            </button>
-
-                            <button data-workspace-mode="soal" class="px-3 py-3 rounded-xl font-black text-xs md:text-sm transition ${
-                                this.activeWorkspaceMode === 'soal'
-                                    ? 'bg-white text-purple-700 shadow-sm'
-                                    : 'text-slate-500 hover:text-slate-800'
-                            }">
-                                <i class="fas fa-circle-question mr-1 md:mr-2"></i>Soal
-                            </button>
-                        </div>
+                    <div class="rounded-2xl bg-slate-50 p-3">
+                        <p class="text-[10px] uppercase font-black text-slate-400">Soal</p>
+                        <p class="text-lg font-black text-slate-900">${moduleQuestions}</p>
                     </div>
-                </section>
-
-                <section class="bg-white border border-slate-200 rounded-[1.7rem] md:rounded-3xl p-4 md:p-6 min-h-[420px] shadow-sm">
-                    ${this.renderWorkspaceContentHTML()}
-                </section>
-
-                ${this.renderCourseExamSectionHTML()}
+                </div>
             </div>
         `;
     },
@@ -846,6 +1430,31 @@ export const TeacherMaterialsPage = {
             });
         });
 
+        document.querySelectorAll('[data-edit-module]').forEach(btn => {
+            btn.addEventListener('click', event => {
+                event.stopPropagation();
+                const module = this.modules.find(item => item.id === btn.dataset.editModule);
+                if (module) this.showModuleForm(module);
+            });
+        });
+
+        document.querySelectorAll('[data-delete-module]').forEach(btn => {
+            btn.addEventListener('click', event => {
+                event.stopPropagation();
+                const module = this.modules.find(item => item.id === btn.dataset.deleteModule);
+
+                AppConfirmModal.open({
+                    title: 'Hapus modul?',
+                    message: `Modul "${module?.title || 'ini'}" akan dihapus. Pastikan materi dan soal di dalamnya sudah dikosongkan.`,
+                    type: 'danger',
+                    confirmText: 'Hapus',
+                    onConfirm: async () => {
+                        await this.deleteModule(btn.dataset.deleteModule);
+                    }
+                });
+            });
+        });
+
         document.querySelectorAll('[data-add-material]').forEach(btn => {
             btn.addEventListener('click', () => {
                 this.showMaterialForm(btn.dataset.addMaterial);
@@ -1023,6 +1632,16 @@ export const TeacherMaterialsPage = {
                     subtitle: 'Soal ujian yang akan dikerjakan siswa.',
                     questions: this.examQuestions,
                     theme: 'blue'
+                });
+            },
+
+            onSimulate: () => {
+                ExamSimulator.open({
+                    title: this.selectedCourse?.title
+                        ? `Ujian ${this.selectedCourse.title}`
+                        : 'Ujian Course',
+                    questions: this.examQuestions,
+                    durationMinutes: this.examSetting?.duration_minutes || 10
                 });
             },
 
@@ -1395,8 +2014,11 @@ export const TeacherMaterialsPage = {
                         placeholder="Urutan modul"
                     >
 
-                    <button class="w-full bg-blue-600 text-white rounded-2xl py-3 font-black">
-                        Simpan
+                    <button id="btn-save-module" class="w-full bg-blue-600 text-white rounded-2xl py-3 font-black flex items-center justify-center gap-2">
+                        <span class="btn-label">Simpan Modul</span>
+                        <span class="btn-loading hidden">
+                            <i class="fas fa-spinner fa-spin"></i> Menyimpan...
+                        </span>
                     </button>
                 </form>
             `
@@ -1405,15 +2027,31 @@ export const TeacherMaterialsPage = {
         document.getElementById('module-form')?.addEventListener('submit', async e => {
             e.preventDefault();
 
+            if (this.isSubmittingModule) return;
+            this.isSubmittingModule = true;
+
+            const submitBtn = document.getElementById('btn-save-module');
+            const label = submitBtn?.querySelector('.btn-label');
+            const loading = submitBtn?.querySelector('.btn-loading');
+
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-70', 'cursor-not-allowed');
+            label?.classList.add('hidden');
+            loading?.classList.remove('hidden');
+
             const form = new FormData(e.target);
 
             const payload = {
-                title: form.get('title'),
+                title: String(form.get('title') || '').trim(),
                 order_index: Number(form.get('order_index') || 0),
                 course_id: this.selectedCourse.id
             };
 
             try {
+                if (!payload.title) {
+                    throw new Error('Judul modul wajib diisi.');
+                }
+
                 if (module) {
                     await this.apiFetch(`/teacher/${this.teacherId}/modules/${module.id}`, {
                         method: 'PUT',
@@ -1437,6 +2075,13 @@ export const TeacherMaterialsPage = {
                 this.refreshWorkspace();
             } catch (error) {
                 AppToast.error(error.message);
+            } finally {
+                this.isSubmittingModule = false;
+
+                submitBtn.disabled = false;
+                submitBtn.classList.remove('opacity-70', 'cursor-not-allowed');
+                label?.classList.remove('hidden');
+                loading?.classList.add('hidden');
             }
         });
     },
@@ -1545,8 +2190,11 @@ export const TeacherMaterialsPage = {
 
                 const method = material ? 'PUT' : 'POST';
 
+                const uploadToken = localStorage.getItem(CONFIG.STORAGE_KEY);
+
                 const res = await fetch(`${API_URL}${endpoint}`, {
                     method,
+                    headers: uploadToken ? { Authorization: `Bearer ${uploadToken}` } : {},
                     body: formData
                 });
 

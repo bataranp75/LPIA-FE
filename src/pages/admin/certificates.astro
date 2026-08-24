@@ -1,0 +1,88 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Manajemen Sertifikat">
+    <section id="admin-certificates-page">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+            <div class="flex items-start gap-4">
+                <button id="admin-sidebar-toggle" class="lg:hidden w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900">Manajemen Sertifikat</h1>
+                    <p class="text-slate-500 mt-2">Kelola antrian dan penerbitan sertifikat siswa.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                <p class="text-xs font-bold text-slate-400">Menunggu Diterbitkan</p>
+                <h2 id="cert-total-pending" class="text-2xl font-black mt-2 text-amber-600">0</h2>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                <p class="text-xs font-bold text-slate-400">Sudah Diterbitkan</p>
+                <h2 id="cert-total-issued" class="text-2xl font-black mt-2 text-emerald-600">0</h2>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                <p class="text-xs font-bold text-slate-400">Total Sertifikat</p>
+                <h2 id="cert-total-all" class="text-2xl font-black mt-2">0</h2>
+            </div>
+        </div>
+
+        <!-- Filter -->
+        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-6 flex flex-col md:flex-row gap-3">
+            <input id="certificate-search" placeholder="Cari siswa atau kursus..." class="flex-1 px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500">
+
+            <select id="certificate-status-filter" class="px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500">
+                <option value="">Semua Status</option>
+                <option value="pending">Menunggu Diterbitkan</option>
+                <option value="issued">Sudah Diterbitkan</option>
+            </select>
+        </div>
+
+        <!-- Tabel sertifikat -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-10">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-slate-100 text-slate-600">
+                        <tr>
+                            <th class="p-4 text-left">Siswa</th>
+                            <th class="p-4 text-left">Kursus</th>
+                            <th class="p-4 text-left">No. Sertifikat</th>
+                            <th class="p-4 text-left">Status</th>
+                            <th class="p-4 text-left">Tanggal Terbit</th>
+                            <th class="p-4 text-left">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="certificates-table-body" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Template Sertifikat -->
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm p-6">
+            <div class="mb-5">
+                <h2 class="text-xl font-black text-slate-900">Template Sertifikat</h2>
+                <p class="text-sm text-slate-500 mt-1">Simpan template PDF per kursus untuk mempermudah penerbitan (dan auto-generate di masa depan).</p>
+            </div>
+
+            <form id="template-upload-form" class="flex flex-col md:flex-row gap-3 mb-6">
+                <select id="template-course-select" name="course_id" required class="flex-1 px-4 py-3 rounded-xl border border-slate-200 outline-none focus:border-blue-500">
+                    <option value="">Pilih kursus...</option>
+                </select>
+                <input id="template-file-input" name="template" type="file" accept="application/pdf" required class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-sm">
+                <button type="submit" class="px-6 py-3 rounded-xl bg-blue-600 text-white font-black text-sm hover:bg-blue-700">
+                    <i class="fas fa-upload mr-2"></i>Simpan Template
+                </button>
+            </form>
+
+            <div id="certificate-templates-list" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+        </div>
+    </section>
+</AdminLayout>

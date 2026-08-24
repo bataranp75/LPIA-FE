@@ -1,0 +1,371 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+
+// Daftar tab dikelola di sini. Tiap task landing page menambah satu tab baru.
+const tabs = [
+    { key: 'hero', label: 'Hero', icon: 'fa-image' },
+    { key: 'trust', label: 'Trust', icon: 'fa-chart-simple' },
+    { key: 'promo', label: 'Promo', icon: 'fa-tags' },
+    { key: 'features', label: 'Kenapa LPIA', icon: 'fa-star' },
+    { key: 'alumni', label: 'Alumni', icon: 'fa-user-graduate' },
+    { key: 'branch', label: 'Cabang', icon: 'fa-location-dot' },
+    { key: 'faq', label: 'FAQ', icon: 'fa-circle-question' },
+    { key: 'cta', label: 'CTA', icon: 'fa-bullhorn' },
+];
+---
+
+<AdminLayout title="Landing Page">
+    <section id="admin-landing-page">
+        <div class="flex items-start gap-4 mb-8">
+            <button id="admin-sidebar-toggle" class="lg:hidden w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <div>
+                <h1 class="text-3xl font-black">Landing Page</h1>
+                <p class="text-slate-500 mt-1">Kelola tampilan halaman utama: hero, promo, statistik, alumni, dan lainnya.</p>
+            </div>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="border-b border-slate-200 mb-8 overflow-x-auto">
+            <div class="flex gap-1 min-w-max" id="landing-tabs">
+                {tabs.map((tab, i) => (
+                    <button
+                        type="button"
+                        class="landing-tab-btn flex items-center gap-2 px-5 py-3 font-bold text-sm border-b-2 transition whitespace-nowrap"
+                        data-tab={tab.key}
+                        data-active={i === 0 ? 'true' : 'false'}
+                    >
+                        <i class={`fas ${tab.icon}`}></i>
+                        {tab.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        <!-- ───────────── Panel: HERO ───────────── -->
+        <div class="landing-panel" data-panel="hero">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <!-- Form -->
+                <form id="hero-form" class="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Badge</label>
+                        <input name="badge" type="text" maxlength="60"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                            placeholder="Platform Kursus Terpercaya" />
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Judul (Headline)</label>
+                        <textarea name="title" rows="2"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+                            placeholder="Tingkatkan Kompetensi Anda di LPIA Wisma Asri"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Subjudul</label>
+                        <textarea name="subtitle" rows="3"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"
+                            placeholder="Kursus Bahasa Inggris, Bahasa Jepang, Komputer..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Teks Tombol Utama</label>
+                            <input name="primary_text" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                                placeholder="Mulai Belajar" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Link Tombol Utama</label>
+                            <input name="primary_link" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                                placeholder="#kursus atau /courses" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Teks Tombol Sekunder</label>
+                            <input name="secondary_text" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                                placeholder="Lihat Program" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Link Tombol Sekunder</label>
+                            <input name="secondary_link" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                                placeholder="/courses" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Banner Hero</label>
+                        <input name="banner" type="file" accept="image/png,image/jpeg,image/webp" id="hero-banner-input"
+                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                        <p class="text-xs text-slate-400 mt-1.5">Format JPG/PNG/WEBP, maksimal 3MB. Rasio ideal 4:3 atau 16:10.</p>
+                    </div>
+
+                    <div class="pt-2">
+                        <button type="submit" id="hero-save-btn"
+                            class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                            <i class="fas fa-floppy-disk mr-2"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Preview banner -->
+                <div class="lg:col-span-2">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm sticky top-6">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">Preview Banner</h3>
+                        <div class="aspect-[4/3] w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
+                            <img id="hero-banner-preview" src="" alt="Preview banner"
+                                class="w-full h-full object-cover hidden" />
+                            <div id="hero-banner-empty" class="text-center text-slate-400">
+                                <i class="fas fa-image text-4xl mb-2"></i>
+                                <p class="text-xs font-semibold">Belum ada banner</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ───────────── Panel: TRUST ───────────── -->
+        <div class="landing-panel hidden" data-panel="trust">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm max-w-3xl">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="font-bold text-slate-800">Statistik Kepercayaan</h3>
+                        <p class="text-sm text-slate-500 mt-1">Angka yang tampil di band trust landing page. Ikon memakai kelas Font Awesome (mis. <code class="text-blue-600">fa-medal</code>).</p>
+                    </div>
+                    <button type="button" id="trust-add-btn"
+                        class="shrink-0 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl font-bold text-sm hover:bg-blue-100 transition">
+                        <i class="fas fa-plus mr-1"></i> Tambah
+                    </button>
+                </div>
+
+                <div id="trust-rows" class="space-y-3"></div>
+
+                <div class="pt-6 mt-2 border-t border-slate-100">
+                    <button type="button" id="trust-save-btn"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                        <i class="fas fa-floppy-disk mr-2"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ───────────── Panel: PROMO ───────────── -->
+        <div class="landing-panel hidden" data-panel="promo">
+            <div class="flex items-center justify-between gap-4 mb-6">
+                <div>
+                    <h3 class="font-bold text-slate-800">Daftar Promo</h3>
+                    <p class="text-sm text-slate-500 mt-1">Promo aktif & masih dalam periode akan tampil di landing page.</p>
+                </div>
+                <button type="button" id="promo-create-btn"
+                    class="shrink-0 px-5 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-2"></i> Tambah Promo
+                </button>
+            </div>
+
+            <div id="promo-list" class="grid grid-cols-1 md:grid-cols-2 gap-5"></div>
+        </div>
+
+        <!-- ───────────── Panel: FEATURES (Kenapa LPIA) ───────────── -->
+        <div class="landing-panel hidden" data-panel="features">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm max-w-4xl">
+                <div class="flex items-start justify-between gap-4 mb-6">
+                    <div>
+                        <h3 class="font-bold text-slate-800">Alasan Belajar di LPIA</h3>
+                        <p class="text-sm text-slate-500 mt-1">Kartu keunggulan yang tampil di landing. Ikon memakai kelas Font Awesome (mis. <code class="text-blue-600">fa-certificate</code>).</p>
+                    </div>
+                    <button type="button" id="features-add-btn"
+                        class="shrink-0 px-4 py-2.5 bg-blue-50 text-blue-700 rounded-xl font-bold text-sm hover:bg-blue-100 transition">
+                        <i class="fas fa-plus mr-1"></i> Tambah
+                    </button>
+                </div>
+
+                <div id="features-rows" class="space-y-3"></div>
+
+                <div class="pt-6 mt-2 border-t border-slate-100">
+                    <button type="button" id="features-save-btn"
+                        class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                        <i class="fas fa-floppy-disk mr-2"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ───────────── Panel: ALUMNI ───────────── -->
+        <div class="landing-panel hidden" data-panel="alumni">
+            <div class="flex items-center justify-between gap-4 mb-6">
+                <div>
+                    <h3 class="font-bold text-slate-800">Testimonial Alumni</h3>
+                    <p class="text-sm text-slate-500 mt-1">Alumni berstatus "Tampil" akan muncul di carousel testimonial landing page.</p>
+                </div>
+                <button type="button" id="alumni-create-btn"
+                    class="shrink-0 px-5 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-2"></i> Tambah Alumni
+                </button>
+            </div>
+
+            <div id="alumni-list" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
+        </div>
+
+        <!-- ───────────── Panel: CABANG ───────────── -->
+        <div class="landing-panel hidden" data-panel="branch">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <form id="branch-form" class="lg:col-span-3 bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Nama Cabang</label>
+                            <input name="name" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="LPIA Wisma Asri" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Jam Operasional</label>
+                            <input name="hours" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Senin – Sabtu, 08.00 – 20.00 WIB" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Alamat</label>
+                        <textarea name="address" rows="2"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                            placeholder="Alamat lengkap cabang..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Telepon</label>
+                            <input name="phone" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="(021) 5366 4444" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">WhatsApp</label>
+                            <input name="whatsapp" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="0812 3456 7890" />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Link Google Maps</label>
+                        <input name="maps_link" type="text"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                            placeholder="https://maps.app.goo.gl/..." />
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Tagline</label>
+                            <input name="tagline" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Mudah dijangkau, nyaman untuk belajar!" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Deskripsi Singkat</label>
+                            <input name="description" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Lokasi strategis, dekat transportasi umum..." />
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Foto Gedung / Cabang</label>
+                        <input name="photo" type="file" accept="image/png,image/jpeg,image/webp" id="branch-photo-input"
+                            class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" />
+                        <p class="text-xs text-slate-400 mt-1.5">Format JPG/PNG/WEBP, maksimal 3MB.</p>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" id="branch-save-btn"
+                            class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                            <i class="fas fa-floppy-disk mr-2"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+
+                <div class="lg:col-span-2">
+                    <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm sticky top-6">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">Preview Foto Cabang</h3>
+                        <div class="aspect-[4/3] w-full rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
+                            <img id="branch-photo-preview" src="" alt="Preview foto cabang" class="w-full h-full object-cover hidden" />
+                            <div id="branch-photo-empty" class="text-center text-slate-400">
+                                <i class="fas fa-building text-4xl mb-2"></i>
+                                <p class="text-xs font-semibold">Belum ada foto</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ───────────── Panel: FAQ ───────────── -->
+        <div class="landing-panel hidden" data-panel="faq">
+            <div class="flex items-center justify-between gap-4 mb-6">
+                <div>
+                    <h3 class="font-bold text-slate-800">Daftar FAQ</h3>
+                    <p class="text-sm text-slate-500 mt-1">Pertanyaan berstatus "Tampil" muncul sebagai accordion di landing page.</p>
+                </div>
+                <button type="button" id="faq-create-btn"
+                    class="shrink-0 px-5 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition">
+                    <i class="fas fa-plus mr-2"></i> Tambah FAQ
+                </button>
+            </div>
+
+            <div id="faq-list" class="space-y-4 max-w-4xl"></div>
+        </div>
+
+        <div id="modal-root"></div>
+
+        <!-- ───────────── Panel: CTA ───────────── -->
+        <div class="landing-panel hidden" data-panel="cta">
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm max-w-2xl">
+                <form id="cta-form" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Judul</label>
+                        <input name="title" type="text"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                            placeholder="Siap Mulai Belajar Bersama LPIA?" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1.5">Subjudul</label>
+                        <textarea name="subtitle" rows="2"
+                            class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-none"
+                            placeholder="Daftar sekarang dan raih kemampuan terbaik..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Teks Tombol Utama</label>
+                            <input name="primary_text" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Daftar Sekarang" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Link Tombol Utama</label>
+                            <input name="primary_link" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="/login" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Teks Tombol Sekunder</label>
+                            <input name="secondary_text" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="Konsultasi Gratis" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-1.5">Link Tombol Sekunder</label>
+                            <input name="secondary_link" type="text"
+                                class="w-full px-4 py-2.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="#bantuan" />
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" id="cta-save-btn"
+                            class="px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition disabled:opacity-60 disabled:cursor-not-allowed">
+                            <i class="fas fa-floppy-disk mr-2"></i> Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</AdminLayout>

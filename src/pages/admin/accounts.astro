@@ -12,7 +12,7 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
 
                 <div>
                     <h1 class="text-3xl font-black">Manajemen Akun & Akses</h1>
-                    <p class="text-slate-500 mt-1">Kelola akun siswa, guru, dan permission CRUD guru.</p>
+                    <p class="text-slate-500 mt-1">Kelola akun siswa dan guru pada sistem LMS.</p>
                 </div>
             </div>
 
@@ -30,6 +30,21 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
             </button>
         </div>
 
+        <div class="mb-4 flex flex-col md:flex-row gap-3">
+            <div class="relative flex-1">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input
+                    id="account-search"
+                    type="search"
+                    placeholder="Cari nama siswa atau guru..."
+                    class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-white outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 font-semibold text-sm"
+                >
+            </div>
+            <button id="btn-clear-account-search" class="px-5 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 font-bold hover:bg-slate-50">
+                Reset
+            </button>
+        </div>
+
         <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
@@ -37,8 +52,6 @@ import AdminLayout from '../../layouts/AdminLayout.astro';
                         <tr>
                             <th class="p-4 text-left">Nama</th>
                             <th class="p-4 text-left">Role</th>
-                            <th class="p-4 text-left">Materi</th>
-                            <th class="p-4 text-left">Sertifikat</th>
                             <th class="p-4 text-left">Aksi</th>
                         </tr>
                     </thead>

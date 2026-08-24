@@ -1,0 +1,54 @@
+---
+export const prerender = false;
+import AdminLayout from '../../layouts/AdminLayout.astro';
+---
+
+<AdminLayout title="Manajemen Pendaftaran Offline">
+  <section id="admin-offline-registrations-page">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+      <div class="flex items-start gap-4">
+        <button id="admin-sidebar-toggle" class="lg:hidden w-11 h-11 rounded-xl bg-white border border-slate-200 shadow-sm text-slate-700">
+          <i class="fas fa-bars"></i>
+        </button>
+
+        <div>
+          <h1 class="text-3xl font-black text-slate-900">Manajemen Pendaftaran Offline</h1>
+          <p class="text-slate-500 mt-2">Kelola data pendaftaran siswa untuk kelas offline.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="rounded-2xl overflow-hidden">
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-100 text-slate-600">
+              <tr>
+                <th class="p-4 text-left">Nama Siswa</th>
+                <th class="p-4 text-left">Kursus</th>
+                <th class="p-4 text-left">Status</th>
+                <th class="p-4 text-left">Harga Final</th>
+                <th class="p-4 text-left">Tanggal Daftar</th>
+                <th class="p-4 text-left">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="offline-registrations-table-body" class="divide-y divide-slate-100 bg-white">
+              <tr>
+                <td colspan="6" class="p-4 text-center text-slate-500">Memuat data...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <dialog id="detail-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-transparent p-4">
+    <div class="w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white shadow-2xl p-6 md:p-8">
+      <div id="detail-modal-content">
+        Memuat...
+      </div>
+    </div>
+  </dialog>
+  <script type="module" src="/src/scripts/dom/admin/adminOfflineRegistrationPage.js"></script>
+</AdminLayout>

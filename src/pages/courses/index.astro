@@ -1,41 +1,24 @@
 ---
-// src/pages/courses.astro
 import Layout from '../../layouts/Layout.astro';
 ---
 
 <Layout title="Katalog Kursus | LPIA">
-    <div class="min-h-screen bg-slate-50 pt-32 pb-24">
-        <div class="max-w-7xl mx-auto px-4 md:px-6">
-            
-            <div class="mb-10 text-center md:text-left">
-                <h1 class="text-4xl font-black text-slate-900 tracking-tight">Eksplorasi Kursus</h1>
-                <p class="text-slate-500 mt-2 text-lg">Temukan kelas terbaik untuk meningkatkan keahlian Anda.</p>
-            </div>
-
-            <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm mb-10 flex flex-col md:flex-row gap-4 relative z-10">
-                
-                <div class="relative flex-grow">
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-                    <input type="text" id="course-search-input" placeholder="Ketik nama kursus..." 
-                           class="w-full pl-11 pr-4 py-3.5 rounded-xl border border-slate-200 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all font-medium text-slate-700">
-                </div>
-
-                <div class="relative">
-                    <select id="course-category-filter" class="w-full md:w-auto pl-4 pr-10 py-3.5 rounded-xl border border-slate-200 outline-none focus:border-blue-500 bg-white font-semibold text-slate-700 cursor-pointer appearance-none">
-                        <option value="all">Semua Kategori</option>
-                        <option value="Bahasa Inggris">Bahasa Inggris</option>
-                        <option value="Persiapan TOEFL">Persiapan TOEFL</option>
-                        <option value="Bahasa Mandarin">Bahasa Mandarin</option>
-                        <option value="General">Lainnya / General</option>
-                    </select>
-                    <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none text-xs"></i>
-                </div>
-
-            </div>
-
-            <div id="courses-grid-page" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                </div>
-
+  <main class="min-h-screen bg-white pb-24 pt-28">
+    <div class="mx-auto max-w-7xl px-4 md:px-6">
+      <section class="pb-10">
+        <h1 class="text-4xl font-normal tracking-[-0.05em] text-[#1A1D20] md:text-6xl">Katalog Kursus</h1>
+        <p class="mt-4 max-w-2xl text-[#4A4E57]">Filter berdasarkan kategori, level, metode belajar, dan jenis kelas untuk menemukan kursus yang relevan.</p>
+      </section>
+      <section class="flex flex-col gap-3 border-y border-[#E5E4DE] py-5 lg:flex-row lg:items-center">
+        <div class="relative flex-1"><i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[#7A7F8A]"></i><input type="text" id="course-search-input" placeholder="Cari kursus..." class="h-12 w-full rounded-xl border border-[#E5E4DE] pl-11 pr-4 text-sm text-[#1A1D20] outline-none placeholder:text-[#7A7F8A] focus:border-2 focus:border-[#0F4C81]" /></div>
+        <div class="grid grid-cols-2 gap-3 lg:flex">
+          <div class="relative"><select id="course-category-filter" class="h-12 w-full cursor-pointer appearance-none rounded-xl border border-[#E5E4DE] bg-white pl-4 pr-10 text-sm font-medium text-[#1A1D20] outline-none focus:border-2 focus:border-[#0F4C81] lg:w-44"><option value="all">Semua Kategori</option><option value="Komputer">Komputer</option><option value="Bahasa Inggris">Bahasa Inggris</option><option value="Bahasa Asing">Bahasa Asing</option><option value="Desain">Desain</option><option value="Programming">Programming</option><option value="Marketing">Marketing</option><option value="Akuntansi">Akuntansi</option><option value="Bimbingan Belajar">Bimbingan Belajar</option></select><i class="fas fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#7A7F8A]"></i></div>
+          <div class="relative"><select id="course-level-filter" class="h-12 w-full cursor-pointer appearance-none rounded-xl border border-[#E5E4DE] bg-white pl-4 pr-10 text-sm font-medium text-[#1A1D20] outline-none focus:border-2 focus:border-[#0F4C81] lg:w-36"><option value="all">Semua Level</option><option value="Beginner">Beginner</option><option value="Intermediate">Intermediate</option><option value="Advanced">Advanced</option></select><i class="fas fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#7A7F8A]"></i></div>
+          <div class="relative"><select id="course-delivery-filter" class="h-12 w-full cursor-pointer appearance-none rounded-xl border border-[#E5E4DE] bg-white pl-4 pr-10 text-sm font-medium text-[#1A1D20] outline-none focus:border-2 focus:border-[#0F4C81] lg:w-36"><option value="all">Semua Metode</option><option value="Online">Online</option><option value="Offline">Offline</option></select><i class="fas fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#7A7F8A]"></i></div>
+          <div class="relative"><select id="course-learning-filter" class="h-12 w-full cursor-pointer appearance-none rounded-xl border border-[#E5E4DE] bg-white pl-4 pr-10 text-sm font-medium text-[#1A1D20] outline-none focus:border-2 focus:border-[#0F4C81] lg:w-36"><option value="all">Semua Jenis</option><option value="Regular">Regular</option><option value="Private">Private</option></select><i class="fas fa-chevron-down pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs text-[#7A7F8A]"></i></div>
         </div>
+      </section>
+      <section class="mt-8"><div id="courses-grid-page" class="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4"></div></section>
     </div>
+  </main>
 </Layout>

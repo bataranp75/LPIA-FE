@@ -6,14 +6,19 @@ interface Props {
 }
 
 const { title } = Astro.props;
-const pathname = Astro.url.pathname;
 
 const menus = [
     { href: '/admin/dashboard', label: 'Homepage', icon: 'fa-house' },
     { href: '/admin/accounts', label: 'Manajemen Akun', icon: 'fa-users-gear' },
     { href: '/admin/transactions', label: 'Manajemen Transaksi', icon: 'fa-receipt' },
+    { href: '/admin/offline-registrations', label: 'Manajemen Pendaftaran Offline', icon: 'fa-clipboard-list' },
     { href: '/admin/courses', label: 'Manajemen Kursus', icon: 'fa-book-open' },
+    { href: '/admin/certificates', label: 'Manajemen Sertifikat', icon: 'fa-award' },
+    { href: '/admin/landing', label: 'Landing Page', icon: 'fa-palette' },
 ];
+
+const currentPath = Astro.url.pathname;
+const isActive = (href: string) => currentPath === href || currentPath.startsWith(`${href}/`);
 ---
 
 <!doctype html>
@@ -49,13 +54,10 @@ const menus = [
                 {menus.map((menu) => (
                     <a 
                         href={menu.href}
-                        class={`flex items-center gap-3 px-6 py-4 font-bold text-sm transition ${
-                            pathname === menu.href 
-                                ? 'bg-blue-600 text-white border-r-4 border-blue-800' 
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
-                        }`}
+                        class={`flex items-center gap-3 px-6 py-4 text-sm transition admin-menu-link border-r-4 ${isActive(menu.href) ? 'bg-blue-50 text-blue-700 font-black border-blue-600' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-bold border-transparent'}`}
+                        data-href={menu.href}
                     >
-                        <i class={`fas ${menu.icon} w-5 text-center`}></i>
+                        <i class={`fas ${menu.icon} w-5 text-center ${isActive(menu.href) ? 'text-blue-600' : ''}`}></i>
                         <span>{menu.label}</span>
                     </a>
                 ))}

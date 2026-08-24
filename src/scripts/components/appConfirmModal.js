@@ -37,9 +37,9 @@ export const AppConfirmModal = {
 
         root.innerHTML = `
             <div class="fixed inset-0 z-[13000] flex items-center justify-center p-4">
-                <div class="absolute inset-0 bg-slate-900/45 backdrop-blur-sm app-confirm-overlay"></div>
+                <div class="absolute inset-0 bg-slate-900/45 backdrop-blur-sm app-confirm-overlay modal-fade-in"></div>
 
-                <div class="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl border border-white/70 overflow-hidden">
+                <div class="relative w-full max-w-md bg-white rounded-[2rem] shadow-2xl border border-white/70 overflow-hidden modal-pop-in">
                     <div class="p-6 md:p-7">
                         <div class="flex items-start gap-4">
                             <div class="w-14 h-14 rounded-2xl ${config.iconClass} flex items-center justify-center text-xl shrink-0">
