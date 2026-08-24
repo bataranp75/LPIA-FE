@@ -7,7 +7,7 @@ export const CONFIG = {
     // Jika di localhost, coba BE lokal dulu, baru Railway. Jika di production, sebaliknya.
     API_TARGETS: isLocalhost
     ? ['http://localhost:3000/api/v1']
-    : ['https://lpia-backend-deploy.up.railway.app/api/v1'],
+    : ['https://lms-backend-production-c723.up.railway.app/'],
         
     STORAGE_KEY: 'lpia_user_token',
     USER_INFO: 'lpia_user_data'
