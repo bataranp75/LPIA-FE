@@ -1,6 +1,36 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+:root {
+  --color-primary: #0F3B66;
+  --color-primary-dark: #0A2540;
+  --color-primary-light: #3E6CA0;
+  --color-accent: #E25822;
+  --color-accent-light: #F0785F;
+
+  --color-blue-50: #EFF6FF;
+  --color-blue-100: #DBEAFE;
+  --color-blue-200: #B6D4F2;
+  --color-blue-300: #7FA8D9;
+  --color-blue-400: #4F82BD;
+  --color-blue-500: #2E67A3;
+  --color-blue-600: #0F3B66;
+  --color-blue-700: #0A2540;
+  --color-blue-800: #061E33;
+  --color-blue-900: #041524;
+
+  --font-display: 'Merriweather', 'Georgia', serif;
+  --font-body: 'DM Sans', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --color-ink: #0A2540;
+  --color-body: #4A4E57;
+  --color-muted: #7A7F8A;
+  --color-hairline: #E5E9F0;
+  --color-surface-soft: #EFF6FF;
+  --color-surface-base: #F8FAFC;
+}
+
+.btn-school {
+  @apply bg-gradient-to-br from-[#0F3B66] to-[#0A2540] hover:from-[#0A2540] hover:to-[#061E33] text-white px-6 py-2;
+}
 
 html {
   scroll-behavior: smooth;
