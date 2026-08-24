@@ -1,14 +1,16 @@
 // src/scripts/config/index.js
 
 // Cek apakah web sedang dibuka di localhost
-const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const isLocalhost =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1";
 
 export const CONFIG = {
-    // Jika di localhost, coba BE lokal dulu, baru Railway. Jika di production, sebaliknya.
-    API_TARGETS: isLocalhost
-    ? ['http://localhost:3000/api/v1']
-    : ['https://lms-backend-production-c723.up.railway.app/'],
-        
-    STORAGE_KEY: 'lpia_user_token',
-    USER_INFO: 'lpia_user_data'
+  // Jika di localhost, coba BE lokal dulu, baru Railway. Jika di production, sebaliknya.
+  API_TARGETS: isLocalhost
+    ? ["http://localhost:3000/api/v1"]
+    : ["lms-backend-production-c723.up.railway.app"],
+
+  STORAGE_KEY: "lpia_user_token",
+  USER_INFO: "lpia_user_data",
 };
