@@ -14,12 +14,12 @@
   "dependencies": {
     "@astrojs/node": "^11.1.4",
     "@fortawesome/fontawesome-free": "^7.2.0",
-    "@tailwindcss/vite": "^4.2.2",
+    "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.2.4",
     "canvas-confetti": "^1.9.4",
     "jspdf": "^4.2.1",
     "sweetalert2": "^11.26.24",
-    "tailwindcss": "^4.2.2",
+    "tailwindcss": "^4.3.3",
     "toastify-js": "^1.12.0"
   }
 }
